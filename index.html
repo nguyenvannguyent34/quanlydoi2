@@ -196,6 +196,51 @@
       min-height:110px;
       resize:vertical;
     }
+    .week-preview{
+      margin-top:6px;
+      font-size:14px;
+      color:rgba(255,255,255,.82);
+      font-style:italic;
+    }
+    .week-input-wrap{
+      position:relative;
+    }
+    .week-input-display{
+      position:absolute;
+      inset:0 52px 0 14px;
+      display:flex;
+      align-items:center;
+      pointer-events:none;
+      color:var(--text);
+      font-size:16px;
+      font-style:normal;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      z-index:1;
+    }
+    .week-input-display.empty{
+      color:#8c96a8;
+    }
+    .week-input-wrap input[type="week"]{
+      position:relative;
+      z-index:2;
+      background:transparent;
+      color:transparent;
+      caret-color:transparent;
+    }
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit,
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit-fields-wrapper,
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit-text,
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit-month-field,
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit-week-field,
+    .week-input-wrap input[type="week"]::-webkit-datetime-edit-year-field{
+      color:transparent;
+    }
+    .week-input-wrap input[type="week"]::-webkit-calendar-picker-indicator{
+      opacity:1;
+      cursor:pointer;
+    }
     button{
       border:none;
       background:var(--primary);
@@ -495,6 +540,7 @@
             </button>
           </div>
           <input id="adminPassword" type="hidden" value="" />
+          <input id="viewerPassword" type="hidden" value="" />
         </div>
       </div>
 
@@ -516,7 +562,7 @@
               <div class="flex">
                 <button id="btnPrintWeeklyReportViewer" class="secondary">In báo cáo</button>
                 <button id="btnRefreshViewer" class="secondary">Làm mới</button>
-                <button id="btnBackHome" class="secondary">Đổi chế độ</button>
+                <button id="btnBackHome" class="secondary">Quay lại</button>
               </div>
             </div>
 
@@ -580,8 +626,7 @@
                 </div>
               </div>
 
-              <div class="print-note">Mẹo: chọn <b>Tuần giao</b> trước khi in để tạo báo cáo đúng theo kế hoạch cần theo dõi.</div>
-
+              
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -603,7 +648,7 @@
 
           <div id="adminPanel" class="hidden">
             <div class="admin-toolbar">
-              <div class="muted small">Admin có thể tạo mới, chỉnh sửa, xóa nhiệm vụ và đồng bộ dữ liệu dùng chung.</div>
+              
               <div class="flex">
                 <button id="btnPrintWeeklyReportAdmin" class="secondary">In báo cáo</button>
                 <button id="btnRefreshAdmin">Làm mới</button>
@@ -639,8 +684,12 @@
                   </select>
                 </div>
                 <div>
-                  <label for="taskAssignedWeek">Thời gian giao (theo tuần)</label>
-                  <input id="taskAssignedWeek" type="week" />
+                  <label for="taskAssignedWeek">Thời gian giao (Tuần/Tháng)</label>
+                  <div class="week-input-wrap">
+                    <input id="taskAssignedWeek" type="week" />
+                    <div id="taskAssignedWeekInlineDisplay" class="week-input-display empty">Chọn Tuần/Tháng</div>
+                  </div>
+                  <div id="taskAssignedWeekDisplay" class="week-preview">-</div>
                 </div>
                 <div>
                   <label for="taskDueDate">Hạn hoàn thành</label>
@@ -693,8 +742,7 @@
             <div class="panel-box">
               <div class="flex" style="justify-content:space-between; margin-bottom:6px">
                 <h3 style="margin:0;font-size:22px">Danh sách quản trị</h3>
-                <div class="pill"><b>Chế độ:</b> <span id="dataModeAdmin">Cục bộ</span></div>
-              </div>
+                              </div>
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -720,11 +768,29 @@
     </div>
   </div>
 
+  <div id="viewerLoginModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 style="margin:0;font-size:24px">Đăng nhập xem công việc</h3>
+        <div class="muted small" style="margin-top:6px">Nhập mật khẩu để xem danh sách công việc.</div>
+      </div>
+      <div class="modal-body">
+        <label for="viewerPasswordInput">Mật khẩu</label>
+        <input id="viewerPasswordInput" type="password" placeholder="Nhập mật khẩu xem công việc" />
+        <div id="viewerModalError" class="modal-error"></div>
+        <div class="flex" style="justify-content:flex-end; margin-top:8px">
+          <button id="btnCancelViewerLogin" class="secondary">Hủy</button>
+          <button id="btnSubmitViewerLogin">Đăng nhập</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="adminLoginModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-head">
         <h3 style="margin:0;font-size:24px">Đăng nhập Admin</h3>
-        <div class="muted small" style="margin-top:6px">Nhập mật khẩu để thêm, sửa, xóa và quản lý công việc.</div>
+        <div class="muted small" style="margin-top:6px">Nhập mật khẩu để quản lý công việc.</div>
       </div>
       <div class="modal-body">
         <label for="adminPasswordInput">Mật khẩu</label>
@@ -769,8 +835,12 @@
             </select>
           </div>
           <div>
-            <label for="editTaskAssignedWeek">Thời gian giao (theo tuần)</label>
-            <input id="editTaskAssignedWeek" type="week" />
+            <label for="editTaskAssignedWeek">Thời gian giao (Tuần/Tháng)</label>
+            <div class="week-input-wrap">
+              <input id="editTaskAssignedWeek" type="week" />
+              <div id="editTaskAssignedWeekInlineDisplay" class="week-input-display empty">Chọn Tuần/Tháng</div>
+            </div>
+            <div id="editTaskAssignedWeekDisplay" class="week-preview">-</div>
           </div>
           <div>
             <label for="editTaskDueDate">Hạn hoàn thành</label>
@@ -808,7 +878,8 @@
 <script>
 (() => {
   // Dán link Web App Apps Script dạng /exec vào dòng dưới để cả đội cùng xem chung dữ liệu.
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6P-PKA4rqBcDnTa69LYoXC0gDCeB-lDJmX0xtcok28PvQYrhy-YViwXU6wSBpEVlB/exec";
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+  const VIEWER_PASSWORD = "doi2pc07";
   const ADMIN_PASSWORD = "101212019";
   const LOCAL_STORAGE_KEY = "pc07_team_tasks_v1";
 
@@ -854,6 +925,8 @@
     $("accessCard").classList.remove("hidden");
     $("mainGrid").classList.remove("expanded");
     $("adminPassword").value = "";
+    $("viewerPassword").value = "";
+    if ($("viewerLoginModal")) closeViewerLoginModal();
     if ($("adminLoginModal")) closeAdminLoginModal();
     if ($("editTaskModal")) closeEditTaskModal();
   }
@@ -863,13 +936,14 @@
   }
 
   function normalizeTask(raw) {
+    const dueDate = normalizeDate(raw.dueDate || raw.deadline || "");
     return {
       id: String(raw.id || raw.taskId || makeId()).trim(),
       title: String(raw.title || raw.name || "").trim(),
       description: String(raw.description || raw.content || "").trim(),
       assignee: String(raw.assignee || raw.owner || "").trim(),
-      assignedWeek: normalizeWeek(raw.assignedWeek || raw.assignWeek || raw.assignmentWeek || raw.thoiGianGiao || ""),
-      dueDate: normalizeDate(raw.dueDate || raw.deadline || ""),
+      assignedWeek: normalizeWeek(raw.assignedWeek || raw.assignWeek || raw.assignmentWeek || raw.thoiGianGiao || "", dueDate),
+      dueDate,
       status: normalizeTaskStatus(raw.status),
       note: String(raw.note || raw.notes || "").trim(),
       createdAt: normalizeIso(raw.createdAt || raw.created_at || new Date().toISOString()),
@@ -895,14 +969,61 @@
     return d.toISOString().slice(0, 10);
   }
 
-  function normalizeWeek(value) {
+  function getAssignedWeekYearHint(value) {
+    const text = String(value || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return Number(text.slice(0, 4));
+    if (/^\d{4}-W\d{2}$/.test(text)) return Number(text.slice(0, 4));
+    if (/^\d{4}$/.test(text)) return Number(text);
+    return new Date().getFullYear();
+  }
+
+  function dateToIsoWeekString(date) {
+    const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const dayNr = utcDate.getUTCDay() || 7;
+    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - dayNr);
+    const isoYear = utcDate.getUTCFullYear();
+    const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+    const weekNo = Math.ceil((((utcDate - yearStart) / 86400000) + 1) / 7);
+    return `${isoYear}-W${String(weekNo).padStart(2, "0")}`;
+  }
+
+  function monthWeekToIsoWeek(year, month, weekOfMonth) {
+    const safeYear = Number(year) || new Date().getFullYear();
+    const safeMonth = Math.min(12, Math.max(1, Number(month) || 1));
+    const safeWeek = Math.min(5, Math.max(1, Number(weekOfMonth) || 1));
+    const lastDay = new Date(Date.UTC(safeYear, safeMonth, 0)).getUTCDate();
+    const startDay = Math.min(lastDay, ((safeWeek - 1) * 7) + 1);
+    const date = new Date(Date.UTC(safeYear, safeMonth - 1, startDay));
+    return dateToIsoWeekString(date);
+  }
+
+  function normalizeWeek(value, fallbackYearOrDate = "") {
     if (!value) return "";
     const text = String(value).trim();
     if (/^\d{4}-W\d{2}$/.test(text)) return text;
-    const match = text.match(/^(\d{4})[-\/](\d{1,2})$/);
+
+    let match = text.match(/^(\d{4})[-\/](\d{1,2})$/);
     if (match) {
       return `${match[1]}-W${String(match[2]).padStart(2, "0")}`;
     }
+
+    const fallbackYear = getAssignedWeekYearHint(fallbackYearOrDate);
+
+    match = text.match(/^Y(\d{4})-M(\d{2})-W([1-5])$/i);
+    if (match) {
+      return monthWeekToIsoWeek(Number(match[1]), Number(match[2]), Number(match[3]));
+    }
+
+    match = text.match(/^M(\d{2})-W([1-5])$/i);
+    if (match) {
+      return monthWeekToIsoWeek(fallbackYear, Number(match[1]), Number(match[2]));
+    }
+
+    match = text.match(/^Tuần\s*([1-5])\s*\/\s*Tháng\s*(\d{1,2})$/i);
+    if (match) {
+      return monthWeekToIsoWeek(fallbackYear, Number(match[2]), Number(match[1]));
+    }
+
     return "";
   }
 
@@ -987,11 +1108,34 @@
     return d.toLocaleDateString("vi-VN");
   }
 
+  function getWeekMonthDisplayData(weekString) {
+    const range = getIsoWeekDateRange(weekString);
+    if (!range) return null;
+    const monday = range.start;
+    const month = monday.getUTCMonth() + 1;
+    const weekOfMonth = Math.floor((monday.getUTCDate() - 1) / 7) + 1;
+    return { weekOfMonth, month, year: monday.getUTCFullYear() };
+  }
+
   function formatWeek(weekString) {
     if (!weekString) return "-";
-    const match = String(weekString).match(/^(\d{4})-W(\d{2})$/);
-    if (!match) return weekString;
-    return `Tuần ${Number(match[2])}/${match[1]}`;
+    const data = getWeekMonthDisplayData(weekString);
+    if (!data) return weekString;
+    return `Tuần ${data.weekOfMonth}/Tháng ${data.month}`;
+  }
+
+  function updateWeekDisplay(inputId, outputId, inlineId) {
+    const input = $(inputId);
+    const output = $(outputId);
+    const inline = inlineId ? $(inlineId) : null;
+    if (!input || !output) return;
+    const formatted = input.value ? formatWeek(input.value) : "-";
+    output.textContent = formatted;
+    if (inline) {
+      const hasValue = !!input.value;
+      inline.textContent = hasValue ? formatWeek(input.value) : "Chọn Tuần/Tháng";
+      inline.classList.toggle("empty", !hasValue);
+    }
   }
 
   function ensureSelectOption(selectId, value) {
@@ -1273,6 +1417,7 @@
     $("taskTitle").value = "";
     $("taskAssignee").value = "";
     $("taskAssignedWeek").value = "";
+    updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
     $("taskDueDate").value = "";
     $("taskStatus").value = "Chưa thực hiện";
     $("taskDescription").value = "";
@@ -1289,6 +1434,7 @@
     ensureSelectOption("editTaskAssignee", task.assignee);
     $("editTaskAssignee").value = task.assignee;
     $("editTaskAssignedWeek").value = task.assignedWeek || "";
+    updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
     $("editTaskDueDate").value = task.dueDate;
     $("editTaskStatus").value = task.status;
     $("editTaskDescription").value = task.description;
@@ -1304,6 +1450,7 @@
     $("editTaskTitle").value = "";
     $("editTaskAssignee").value = "";
     $("editTaskAssignedWeek").value = "";
+    updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
     $("editTaskDueDate").value = "";
     $("editTaskStatus").value = "Chưa thực hiện";
     $("editTaskDescription").value = "";
@@ -1685,11 +1832,40 @@ th{font-weight:700;background:#f1f1f1}
     renderViewerTasks();
   }
 
-  $("btnViewerMode").addEventListener("click", () => {
+  function openViewerLoginModal() {
+    $("viewerLoginModal").classList.remove("hidden");
+    $("viewerPasswordInput").value = "";
+    $("viewerModalError").textContent = "";
+    setTimeout(() => $("viewerPasswordInput").focus(), 30);
+  }
+
+  function closeViewerLoginModal() {
+    $("viewerLoginModal").classList.add("hidden");
+    $("viewerPasswordInput").value = "";
+    $("viewerModalError").textContent = "";
+  }
+
+  function handleViewerLogin() {
+    const pass = $("viewerPasswordInput").value || "";
+    if (!pass) {
+      $("viewerModalError").textContent = "Vui lòng nhập mật khẩu xem công việc.";
+      $("viewerPasswordInput").focus();
+      return;
+    }
+    if (pass !== VIEWER_PASSWORD) {
+      $("viewerModalError").textContent = "Sai mật khẩu xem công việc.";
+      $("viewerPasswordInput").focus();
+      $("viewerPasswordInput").select();
+      return;
+    }
+    $("viewerPassword").value = pass;
+    closeViewerLoginModal();
     enterWorkMode();
     setMain("Danh sách công việc của đội", "Mọi thành viên có thể theo dõi toàn bộ đầu việc, người phụ trách và thời hạn xử lý.");
     showOnly("viewerPanel");
-  });
+  }
+
+  $("btnViewerMode").addEventListener("click", openViewerLoginModal);
 
   function openAdminLoginModal() {
     $("adminLoginModal").classList.remove("hidden");
@@ -1721,7 +1897,7 @@ th{font-weight:700;background:#f1f1f1}
     closeAdminLoginModal();
     enterWorkMode();
     resetForm();
-    setMain("Quản trị công việc", "Admin có thể thêm, sửa, xóa và đồng bộ dữ liệu công việc.");
+    setMain("Quản trị công việc", "");
     showOnly("adminPanel");
   }
 
@@ -1747,6 +1923,10 @@ th{font-weight:700;background:#f1f1f1}
   $("btnExportCsv").addEventListener("click", exportCsv);
   $("btnSaveTask").addEventListener("click", handleSaveTask);
   $("btnResetForm").addEventListener("click", resetForm);
+  $("taskAssignedWeek").addEventListener("input", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
+  $("taskAssignedWeek").addEventListener("change", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
+  $("editTaskAssignedWeek").addEventListener("input", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
+  $("editTaskAssignedWeek").addEventListener("change", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
   $("btnClearFilters").addEventListener("click", clearFilters);
 
   ["filterKeyword", "filterAssignee", "filterWeek", "filterStatus", "filterSoonDue"].forEach(id => {
@@ -1754,10 +1934,23 @@ th{font-weight:700;background:#f1f1f1}
     $(id).addEventListener("change", renderViewerTasks);
   });
 
+  $("btnSubmitViewerLogin").addEventListener("click", handleViewerLogin);
+  $("btnCancelViewerLogin").addEventListener("click", closeViewerLoginModal);
   $("btnSubmitAdminLogin").addEventListener("click", handleAdminLogin);
   $("btnCancelAdminLogin").addEventListener("click", closeAdminLoginModal);
   $("btnSaveEditTask").addEventListener("click", handleSaveEditedTask);
   $("btnCancelEditTask").addEventListener("click", closeEditTaskModal);
+  $("viewerPasswordInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleViewerLogin();
+    } else if (event.key === "Escape") {
+      closeViewerLoginModal();
+    }
+  });
+  $("viewerLoginModal").addEventListener("click", (event) => {
+    if (event.target === $("viewerLoginModal")) closeViewerLoginModal();
+  });
   $("adminPasswordInput").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -1797,6 +1990,8 @@ th{font-weight:700;background:#f1f1f1}
   });
 
   updateSyncUI();
+  updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
+  updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
   renderAll();
   loadTasks();
 })();
