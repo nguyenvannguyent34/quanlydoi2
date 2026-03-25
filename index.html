@@ -678,7 +678,7 @@
               <div class="form-grid" style="margin-top:10px">
                 <div class="full-col">
                   <label for="taskTitle">Tên công việc</label>
-                  <input id="taskTitle" type="text" placeholder="Ví dụ: Rà soát hồ sơ nghiệm thu PCCC tháng 3" />
+                  <input id="taskTitle" type="text" placeholder="Ví dụ: Kiểm tra về PCCC tháng 3" />
                 </div>
                 <div>
                   <label for="taskAssignee">Người phụ trách</label>
@@ -837,7 +837,7 @@
         <div class="form-grid">
           <div class="full-col">
             <label for="editTaskTitle">Tên công việc</label>
-            <input id="editTaskTitle" type="text" placeholder="Ví dụ: Rà soát hồ sơ nghiệm thu PCCC tháng 3" />
+            <input id="editTaskTitle" type="text" placeholder="Ví dụ: Kiểm tra về PCCC tháng 3" />
           </div>
           <div>
             <label for="editTaskAssignee">Người phụ trách</label>
@@ -1007,6 +1007,12 @@
     const yearStart = new Date(Date.UTC(isoYear, 0, 1));
     const weekNo = Math.ceil((((utcDate - yearStart) / 86400000) + 1) / 7);
     return `${isoYear}-W${String(weekNo).padStart(2, "0")}`;
+  }
+
+  function getTodayAssignedWeek() {
+    const now = new Date();
+    const todayUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    return dateToIsoWeekString(todayUtc);
   }
 
   function monthWeekToIsoWeek(year, month, weekOfMonth) {
@@ -1448,14 +1454,18 @@
     return selected;
   }
 
+  function setDefaultAssignedWeek() {
+    $("taskAssignedWeek").value = getTodayAssignedWeek();
+    updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
+  }
+
   function resetForm() {
     $("taskId").value = "";
     $("taskTitle").value = "";
     $("taskAssignee").value = "";
     $("taskAssigneeCustom").value = "";
     toggleCustomAssigneeInput();
-    $("taskAssignedWeek").value = "";
-    updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
+    setDefaultAssignedWeek();
     $("taskDueDate").value = "";
     $("taskStatus").value = "Chưa thực hiện";
     $("taskDescription").value = "";
@@ -1538,7 +1548,7 @@
     const id = makeId();
     const title = $("taskTitle").value.trim();
     const assignee = getCreateTaskAssignee();
-    const assignedWeek = $("taskAssignedWeek").value;
+    const assignedWeek = $("taskAssignedWeek").value || getTodayAssignedWeek();
     const dueDate = $("taskDueDate").value;
     const status = $("taskStatus").value.trim();
     const description = $("taskDescription").value.trim();
@@ -2047,7 +2057,7 @@ th{font-weight:700;background:#f1f1f1}
 
   updateSyncUI();
   toggleCustomAssigneeInput();
-  updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
+  setDefaultAssignedWeek();
   updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
   renderAll();
   loadTasks();
