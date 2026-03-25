@@ -196,6 +196,20 @@
       min-height:110px;
       resize:vertical;
     }
+    .password-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .password-row input{
+      flex:1;
+      min-width:0;
+    }
+    .password-toggle{
+      flex:0 0 auto;
+      white-space:nowrap;
+      padding:12px 16px;
+    }
     .week-preview{
       margin-top:6px;
       font-size:14px;
@@ -681,7 +695,9 @@
                     <option value="Quyền Anh">Quyền Anh</option>
                     <option value="Tuyển">Tuyển</option>
                     <option value="Phương">Phương</option>
+                    <option value="__custom__">Tự điền</option>
                   </select>
+                  <input id="taskAssigneeCustom" class="hidden" type="text" placeholder="Nhập người phụ trách" style="margin-top:8px" />
                 </div>
                 <div>
                   <label for="taskAssignedWeek">Thời gian giao (Tuần/Tháng)</label>
@@ -776,7 +792,10 @@
       </div>
       <div class="modal-body">
         <label for="viewerPasswordInput">Mật khẩu</label>
-        <input id="viewerPasswordInput" type="password" placeholder="Nhập mật khẩu xem công việc" />
+        <div class="password-row">
+          <input id="viewerPasswordInput" type="password" placeholder="Nhập mật khẩu xem công việc" />
+          <button id="btnToggleViewerPassword" type="button" class="secondary password-toggle">Hiện mật khẩu</button>
+        </div>
         <div id="viewerModalError" class="modal-error"></div>
         <div class="flex" style="justify-content:flex-end; margin-top:8px">
           <button id="btnCancelViewerLogin" class="secondary">Hủy</button>
@@ -794,7 +813,10 @@
       </div>
       <div class="modal-body">
         <label for="adminPasswordInput">Mật khẩu</label>
-        <input id="adminPasswordInput" type="password" placeholder="Nhập mật khẩu admin" />
+        <div class="password-row">
+          <input id="adminPasswordInput" type="password" placeholder="Nhập mật khẩu admin" />
+          <button id="btnToggleAdminPassword" type="button" class="secondary password-toggle">Hiện mật khẩu</button>
+        </div>
         <div id="adminModalError" class="modal-error"></div>
         <div class="flex" style="justify-content:flex-end; margin-top:8px">
           <button id="btnCancelAdminLogin" class="secondary">Hủy</button>
@@ -878,9 +900,9 @@
 <script>
 (() => {
   // Dán link Web App Apps Script dạng /exec vào dòng dưới để cả đội cùng xem chung dữ liệu.
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6P-PKA4rqBcDnTa69LYoXC0gDCeB-lDJmX0xtcok28PvQYrhy-YViwXU6wSBpEVlB/exec";
-  const VIEWER_PASSWORD = "Doi2pc07";
-  const ADMIN_PASSWORD = "Doi2thang3";
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+  const VIEWER_PASSWORD = "doi2pc07";
+  const ADMIN_PASSWORD = "101212019";
   const LOCAL_STORAGE_KEY = "pc07_team_tasks_v1";
 
   const state = {
@@ -1412,10 +1434,26 @@
     renderAdminTasks();
   }
 
+  function toggleCustomAssigneeInput() {
+    const select = $("taskAssignee");
+    const input = $("taskAssigneeCustom");
+    const useCustom = select.value === "__custom__";
+    input.classList.toggle("hidden", !useCustom);
+    if (!useCustom) input.value = "";
+  }
+
+  function getCreateTaskAssignee() {
+    const selected = $("taskAssignee").value.trim();
+    if (selected === "__custom__") return $("taskAssigneeCustom").value.trim();
+    return selected;
+  }
+
   function resetForm() {
     $("taskId").value = "";
     $("taskTitle").value = "";
     $("taskAssignee").value = "";
+    $("taskAssigneeCustom").value = "";
+    toggleCustomAssigneeInput();
     $("taskAssignedWeek").value = "";
     updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
     $("taskDueDate").value = "";
@@ -1499,7 +1537,7 @@
   async function handleSaveTask() {
     const id = makeId();
     const title = $("taskTitle").value.trim();
-    const assignee = $("taskAssignee").value.trim();
+    const assignee = getCreateTaskAssignee();
     const assignedWeek = $("taskAssignedWeek").value;
     const dueDate = $("taskDueDate").value;
     const status = $("taskStatus").value.trim();
@@ -1836,6 +1874,7 @@ th{font-weight:700;background:#f1f1f1}
     $("viewerLoginModal").classList.remove("hidden");
     $("viewerPasswordInput").value = "";
     $("viewerModalError").textContent = "";
+    setPasswordVisibility("viewerPasswordInput", "btnToggleViewerPassword", false);
     setTimeout(() => $("viewerPasswordInput").focus(), 30);
   }
 
@@ -1843,34 +1882,24 @@ th{font-weight:700;background:#f1f1f1}
     $("viewerLoginModal").classList.add("hidden");
     $("viewerPasswordInput").value = "";
     $("viewerModalError").textContent = "";
+    setPasswordVisibility("viewerPasswordInput", "btnToggleViewerPassword", false);
   }
 
   function handleViewerLogin() {
-    const pass = $("viewerPasswordInput").value || "";
-    if (!pass) {
-      $("viewerModalError").textContent = "Vui lòng nhập mật khẩu xem công việc.";
-      $("viewerPasswordInput").focus();
-      return;
-    }
-    if (pass !== VIEWER_PASSWORD) {
-      $("viewerModalError").textContent = "Sai mật khẩu xem công việc.";
-      $("viewerPasswordInput").focus();
-      $("viewerPasswordInput").select();
-      return;
-    }
-    $("viewerPassword").value = pass;
+    $("viewerPassword").value = "";
     closeViewerLoginModal();
     enterWorkMode();
     setMain("Danh sách công việc của đội", "Mọi thành viên có thể theo dõi toàn bộ đầu việc, người phụ trách và thời hạn xử lý.");
     showOnly("viewerPanel");
   }
 
-  $("btnViewerMode").addEventListener("click", openViewerLoginModal);
+  $("btnViewerMode").addEventListener("click", handleViewerLogin);
 
   function openAdminLoginModal() {
     $("adminLoginModal").classList.remove("hidden");
     $("adminPasswordInput").value = "";
     $("adminModalError").textContent = "";
+    setPasswordVisibility("adminPasswordInput", "btnToggleAdminPassword", false);
     setTimeout(() => $("adminPasswordInput").focus(), 30);
   }
 
@@ -1878,6 +1907,35 @@ th{font-weight:700;background:#f1f1f1}
     $("adminLoginModal").classList.add("hidden");
     $("adminPasswordInput").value = "";
     $("adminModalError").textContent = "";
+    setPasswordVisibility("adminPasswordInput", "btnToggleAdminPassword", false);
+  }
+
+  function setPasswordVisibility(inputId, buttonId, visible) {
+    const input = $(inputId);
+    const button = $(buttonId);
+    if (!input || !button) return;
+    input.type = visible ? "text" : "password";
+    button.textContent = visible ? "Ẩn mật khẩu" : "Hiện mật khẩu";
+  }
+
+  function togglePasswordVisibility(inputId, buttonId) {
+    const input = $(inputId);
+    if (!input) return;
+    setPasswordVisibility(inputId, buttonId, input.type === "password");
+    input.focus();
+  }
+
+  function handleEnterToSave(event, saveFn, options = {}) {
+    const isTextarea = event.target.tagName === "TEXTAREA";
+    if (event.key === "Escape") {
+      if (typeof options.onEscape === "function") options.onEscape();
+      return;
+    }
+    if (event.key !== "Enter") return;
+    if (event.shiftKey) return;
+    if (isTextarea && event.altKey) return;
+    event.preventDefault();
+    saveFn();
   }
 
   function handleAdminLogin() {
@@ -1923,6 +1981,7 @@ th{font-weight:700;background:#f1f1f1}
   $("btnExportCsv").addEventListener("click", exportCsv);
   $("btnSaveTask").addEventListener("click", handleSaveTask);
   $("btnResetForm").addEventListener("click", resetForm);
+  $("taskAssignee").addEventListener("change", toggleCustomAssigneeInput);
   $("taskAssignedWeek").addEventListener("input", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
   $("taskAssignedWeek").addEventListener("change", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
   $("editTaskAssignedWeek").addEventListener("input", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
@@ -1936,8 +1995,10 @@ th{font-weight:700;background:#f1f1f1}
 
   $("btnSubmitViewerLogin").addEventListener("click", handleViewerLogin);
   $("btnCancelViewerLogin").addEventListener("click", closeViewerLoginModal);
+  $("btnToggleViewerPassword").addEventListener("click", () => togglePasswordVisibility("viewerPasswordInput", "btnToggleViewerPassword"));
   $("btnSubmitAdminLogin").addEventListener("click", handleAdminLogin);
   $("btnCancelAdminLogin").addEventListener("click", closeAdminLoginModal);
+  $("btnToggleAdminPassword").addEventListener("click", () => togglePasswordVisibility("adminPasswordInput", "btnToggleAdminPassword"));
   $("btnSaveEditTask").addEventListener("click", handleSaveEditedTask);
   $("btnCancelEditTask").addEventListener("click", closeEditTaskModal);
   $("viewerPasswordInput").addEventListener("keydown", (event) => {
@@ -1965,16 +2026,11 @@ th{font-weight:700;background:#f1f1f1}
   $("editTaskModal").addEventListener("click", (event) => {
     if (event.target === $("editTaskModal")) closeEditTaskModal();
   });
+  ["taskTitle", "taskAssignee", "taskAssigneeCustom", "taskAssignedWeek", "taskDueDate", "taskStatus", "taskDescription", "taskNote"].forEach(id => {
+    $(id).addEventListener("keydown", (event) => handleEnterToSave(event, handleSaveTask));
+  });
   ["editTaskTitle", "editTaskAssignee", "editTaskAssignedWeek", "editTaskDueDate", "editTaskStatus", "editTaskDescription", "editTaskNote"].forEach(id => {
-    $(id).addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        closeEditTaskModal();
-      }
-      if (event.key === "Enter" && event.ctrlKey) {
-        event.preventDefault();
-        handleSaveEditedTask();
-      }
-    });
+    $(id).addEventListener("keydown", (event) => handleEnterToSave(event, handleSaveEditedTask, { onEscape: closeEditTaskModal }));
   });
 
   $("adminTaskBody").addEventListener("click", (event) => {
@@ -1990,6 +2046,7 @@ th{font-weight:700;background:#f1f1f1}
   });
 
   updateSyncUI();
+  toggleCustomAssigneeInput();
   updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay");
   updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
   renderAll();
