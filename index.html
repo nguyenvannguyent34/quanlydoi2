@@ -352,6 +352,32 @@
     .form-grid .full-col{
       grid-column:1 / -1;
     }
+    .split-field{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      align-items:stretch;
+    }
+    .split-field .field-box{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+    }
+    .split-field textarea{
+      flex:1;
+      min-height:118px;
+    }
+    .split-field .attachment-box{
+      margin-top:0;
+      flex:1;
+      min-height:118px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+    .split-field input[type="file"]{
+      width:100%;
+    }
     .priority-tag,
     .state-tag{
       display:inline-flex;
@@ -418,6 +444,33 @@
     .task-note-cell{
       min-width:140px;
     }
+    .task-note-text{
+      line-height:1.45;
+      white-space:pre-wrap;
+      text-align:center;
+    }
+    .task-note-attachment{
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+    .task-note-image{
+      max-width:180px;
+      max-height:120px;
+      border-radius:10px;
+      border:1px solid #e1e7f0;
+      box-shadow:0 6px 16px rgba(16,24,40,.08);
+    }
+    .task-note-file-link{
+      color:#194185;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .task-note-file-link:hover{
+      text-decoration:underline;
+    }
     .task-row-soon td{
       background:#ffe3ee;
     }
@@ -461,9 +514,13 @@
       justify-content:center;
       padding:20px;
       z-index:1500;
+      overflow-y:auto;
     }
     .modal-card{
       width:min(430px, 100%);
+      max-height:calc(100vh - 40px);
+      display:flex;
+      flex-direction:column;
       background:#fff;
       border-radius:18px;
       border:1px solid #e1e7f0;
@@ -486,12 +543,104 @@
     }
     .modal-card .modal-body{
       padding:18px 20px 20px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      max-height:calc(100vh - 160px);
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-gutter:stable;
     }
     .modal-error{
       margin-top:12px;
       color:#a12626;
       font-size:14px;
       min-height:20px;
+    }
+
+    .attachment-box{
+      margin-top:10px;
+      border:1px dashed #d7deea;
+      border-radius:14px;
+      padding:12px;
+      background:#fcfdff;
+    }
+    .attachment-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .attachment-hint{
+      color:#667085;
+      font-size:13px;
+      line-height:1.45;
+    }
+    .image-preview-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .image-preview-card{
+      border:1px solid #e1e7f0;
+      border-radius:14px;
+      background:#fff;
+      padding:10px;
+      text-align:center;
+    }
+    .image-preview-card img{
+      max-width:100%;
+      max-height:220px;
+      border-radius:10px;
+      display:block;
+      margin:0 auto 8px;
+    }
+    .image-preview-file{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:86px;
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      background:#f5f7fa;
+      border:1px solid #d9e0ea;
+      font-weight:700;
+      color:#475467;
+    }
+    .image-preview-name{
+      font-size:13px;
+      color:#475467;
+      word-break:break-word;
+    }
+    .task-desc-attachment{
+      margin-top:8px;
+      text-align:center;
+    }
+    .task-desc-image-link{
+      display:inline-block;
+      margin-top:8px;
+    }
+    .task-desc-image{
+      max-width:160px;
+      max-height:110px;
+      border-radius:10px;
+      border:1px solid #e1e7f0;
+      display:block;
+      margin:0 auto;
+    }
+    .task-desc-file-link{
+      display:inline-block;
+      margin-top:8px;
+      padding:8px 12px;
+      border-radius:10px;
+      background:#f5f7fa;
+      border:1px solid #d9e0ea;
+      color:#344054;
+      text-decoration:none;
+      font-weight:700;
+      word-break:break-word;
     }
     .copyright{
       text-align:center;
@@ -517,6 +666,18 @@
       .top-unit .line1{font-size:17px}
       .top-unit .line2{font-size:16px}
       .filter-grid,.form-grid,.compact-form-panel .form-grid{grid-template-columns:1fr}
+      .split-field{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .split-field textarea{min-height:96px}
+      .split-field .attachment-box{min-height:96px;padding:10px}
+      .attachment-actions{display:grid;grid-template-columns:1fr}
+      .attachment-actions button{width:100%}
+      .modal-card .modal-body{padding:16px}
+    }
+    @media (max-width: 480px){
+      .split-field{grid-template-columns:1fr}
+      .split-field textarea{min-height:88px}
+      .split-field .attachment-box{min-height:auto}
+      .image-preview-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -621,10 +782,8 @@
                   <label for="filterStatus">Trạng thái</label>
                   <select id="filterStatus">
                     <option value="">Tất cả</option>
-                    <option value="Chưa thực hiện">Chưa thực hiện</option>
                     <option value="Đang thực hiện">Đang thực hiện</option>
                     <option value="Hoàn thành">Hoàn thành</option>
-                    <option value="Tạm dừng">Tạm dừng</option>
                   </select>
                 </div>
                 <div>
@@ -678,7 +837,7 @@
               <div class="form-grid" style="margin-top:10px">
                 <div class="full-col">
                   <label for="taskTitle">Tên công việc</label>
-                  <input id="taskTitle" type="text" placeholder="Ví dụ: Kiểm tra về PCCC tháng 3" />
+                  <input id="taskTitle" type="text" placeholder="Ví dụ: Rà soát hồ sơ nghiệm thu PCCC tháng 3" />
                 </div>
                 <div>
                   <label for="taskAssignee">Người phụ trách</label>
@@ -714,19 +873,41 @@
                 <div>
                   <label for="taskStatus">Trạng thái</label>
                   <select id="taskStatus">
-                    <option value="Chưa thực hiện">Chưa thực hiện</option>
-                    <option value="Đang thực hiện">Đang thực hiện</option>
+                    <option value="Đang thực hiện" selected>Đang thực hiện</option>
                     <option value="Hoàn thành">Hoàn thành</option>
-                    <option value="Tạm dừng">Tạm dừng</option>
                   </select>
                 </div>
-                <div class="full-col">
-                  <label for="taskDescription">Nội dung công việc</label>
-                  <textarea id="taskDescription" placeholder="Mô tả ngắn gọn yêu cầu, đầu việc, lưu ý thực hiện..."></textarea>
+                <div class="full-col split-field">
+                  <div class="field-box">
+                    <label for="taskDescription">Nội dung công việc</label>
+                    <textarea id="taskDescription" placeholder="Mô tả ngắn gọn yêu cầu, đầu việc, lưu ý thực hiện..."></textarea>
+                  </div>
+                  <div class="field-box">
+                    <label for="taskDescriptionImage">Tệp đính kèm</label>
+                    <div class="attachment-box">
+                      <input id="taskDescriptionImage" type="file" accept="image/*,application/pdf,.pdf" multiple />
+                      <div class="attachment-actions">
+                        <button id="btnRemoveTaskImage" type="button" class="secondary">Xóa tệp</button>
+                      </div>
+                      <div id="taskImagePreview" class="image-preview-grid"></div>
+                    </div>
+                  </div>
                 </div>
-                <div class="full-col">
-                  <label for="taskNote">Ghi chú</label>
-                  <textarea id="taskNote" placeholder="Nhập ghi chú bổ sung, yêu cầu phối hợp, văn bản liên quan..."></textarea>
+                <div class="full-col split-field">
+                  <div class="field-box">
+                    <label for="taskNote">Ghi chú</label>
+                    <textarea id="taskNote" placeholder="Nhập ghi chú bổ sung, yêu cầu phối hợp, văn bản liên quan..."></textarea>
+                  </div>
+                  <div class="field-box">
+                    <label for="taskNoteFile">Tệp đính kèm cho ghi chú</label>
+                    <div class="attachment-box">
+                      <input id="taskNoteFile" type="file" accept="image/*,application/pdf,.pdf" multiple />
+                      <div class="attachment-actions">
+                        <button id="btnRemoveTaskNoteFile" type="button" class="secondary">Xóa tệp</button>
+                      </div>
+                      <div id="taskNotePreview" class="image-preview-grid"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="flex" style="margin-top:14px">
@@ -837,7 +1018,7 @@
         <div class="form-grid">
           <div class="full-col">
             <label for="editTaskTitle">Tên công việc</label>
-            <input id="editTaskTitle" type="text" placeholder="Ví dụ: Kiểm tra về PCCC tháng 3" />
+            <input id="editTaskTitle" type="text" placeholder="Ví dụ: Rà soát hồ sơ nghiệm thu PCCC tháng 3" />
           </div>
           <div>
             <label for="editTaskAssignee">Người phụ trách</label>
@@ -871,19 +1052,41 @@
           <div>
             <label for="editTaskStatus">Trạng thái</label>
             <select id="editTaskStatus">
-              <option value="Chưa thực hiện">Chưa thực hiện</option>
               <option value="Đang thực hiện">Đang thực hiện</option>
               <option value="Hoàn thành">Hoàn thành</option>
-              <option value="Tạm dừng">Tạm dừng</option>
             </select>
           </div>
-          <div class="full-col">
-            <label for="editTaskDescription">Nội dung công việc</label>
-            <textarea id="editTaskDescription" placeholder="Mô tả ngắn gọn yêu cầu, đầu việc, lưu ý thực hiện..."></textarea>
+          <div class="full-col split-field">
+            <div class="field-box">
+              <label for="editTaskDescription">Nội dung công việc</label>
+              <textarea id="editTaskDescription" placeholder="Mô tả ngắn gọn yêu cầu, đầu việc, lưu ý thực hiện..."></textarea>
+            </div>
+            <div class="field-box">
+              <label for="editTaskDescriptionImage">Tệp đính kèm</label>
+              <div class="attachment-box">
+                <input id="editTaskDescriptionImage" type="file" accept="image/*,application/pdf,.pdf" multiple />
+                <div class="attachment-actions">
+                  <button id="btnRemoveEditTaskImage" type="button" class="secondary">Xóa tệp</button>
+                </div>
+                <div id="editTaskImagePreview" class="image-preview-grid"></div>
+              </div>
+            </div>
           </div>
-          <div class="full-col">
-            <label for="editTaskNote">Ghi chú</label>
-            <textarea id="editTaskNote" placeholder="Nhập ghi chú bổ sung, yêu cầu phối hợp, văn bản liên quan..."></textarea>
+          <div class="full-col split-field">
+            <div class="field-box">
+              <label for="editTaskNote">Ghi chú</label>
+              <textarea id="editTaskNote" placeholder="Nhập ghi chú bổ sung, yêu cầu phối hợp, văn bản liên quan..."></textarea>
+            </div>
+            <div class="field-box">
+              <label for="editTaskNoteFile">Tệp đính kèm cho ghi chú</label>
+              <div class="attachment-box">
+                <input id="editTaskNoteFile" type="file" accept="image/*,application/pdf,.pdf" multiple />
+                <div class="attachment-actions">
+                  <button id="btnRemoveEditTaskNoteFile" type="button" class="secondary">Xóa tệp</button>
+                </div>
+                <div id="editTaskNotePreview" class="image-preview-grid"></div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="editTaskModalError" class="modal-error"></div>
@@ -904,11 +1107,31 @@
   const VIEWER_PASSWORD = "doi2pc07";
   const ADMIN_PASSWORD = "Doi2thang3";
   const LOCAL_STORAGE_KEY = "pc07_team_tasks_v1";
+  const DESCRIPTION_IMAGE_PREFIX = "__TASKDESCIMG__";
+  const NOTE_ATTACHMENT_PREFIX = "__TASKNOTEFILE__";
+
+  function makeEmptyAttachment() {
+    return {
+      file: null,
+      previewUrl: "",
+      attachmentData: "",
+      attachmentUrl: "",
+      attachmentPreviewUrl: "",
+      attachmentName: "",
+      attachmentType: "",
+      attachmentFileId: "",
+      attachmentMimeType: ""
+    };
+  }
 
   const state = {
     tasks: [],
     syncMode: "local",
-    lastLoadSource: "local"
+    lastLoadSource: "local",
+    createAttachments: [],
+    createNoteAttachments: [],
+    editAttachments: [],
+    editNoteAttachments: []
   };
 
   const $ = (id) => document.getElementById(id);
@@ -926,6 +1149,459 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function safeAttachmentDataUrl(value) {
+    const text = String(value || "").trim();
+    return /^(data:image\/|data:application\/pdf)/i.test(text) ? text : "";
+  }
+
+  function safeAttachmentUrl(value) {
+    const text = String(value || "").trim();
+    return /^https?:\/\//i.test(text) ? text : "";
+  }
+
+  function getAttachmentKind(source = "", fileName = "", mimeType = "") {
+    const text = String(source || "").trim();
+    const name = String(fileName || "").trim().toLowerCase();
+    const mime = String(mimeType || "").trim().toLowerCase();
+    if (/^data:image\//i.test(text) || mime.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(name)) return "image";
+    if (/^data:application\/pdf/i.test(text) || mime === "application/pdf" || name.endsWith('.pdf')) return "pdf";
+    return "";
+  }
+
+  function hasAttachment(item) {
+    if (!item) return false;
+    return !!(item.file || item.attachmentData || item.attachmentUrl || item.attachmentPreviewUrl || item.attachmentFileId);
+  }
+
+  function normalizeAttachment(data) {
+    const raw = data || {};
+    const attachmentData = safeAttachmentDataUrl(raw.attachmentData || raw.image || "");
+    const attachmentUrl = safeAttachmentUrl(raw.attachmentUrl || raw.fileUrl || "");
+    const attachmentPreviewUrl = safeAttachmentUrl(raw.attachmentPreviewUrl || raw.previewUrl || attachmentUrl);
+    const attachmentName = String(raw.attachmentName || raw.imageName || raw.fileName || "").trim();
+    const attachmentMimeType = String(raw.attachmentMimeType || raw.mimeType || "").trim();
+    const attachmentFileId = String(raw.attachmentFileId || raw.fileId || "").trim();
+    const attachmentType = String(raw.attachmentType || getAttachmentKind(attachmentData || attachmentPreviewUrl || attachmentUrl, attachmentName, attachmentMimeType) || "").trim();
+    return {
+      file: raw.file || null,
+      previewUrl: String(raw.previewUrl || "").trim(),
+      attachmentData,
+      attachmentUrl,
+      attachmentPreviewUrl,
+      attachmentName,
+      attachmentType,
+      attachmentFileId,
+      attachmentMimeType
+    };
+  }
+
+  function normalizeAttachmentList(source) {
+    if (!source) return [];
+    const rawList = Array.isArray(source)
+      ? source
+      : Array.isArray(source.attachments)
+        ? source.attachments
+        : [source];
+    return rawList
+      .map(normalizeAttachment)
+      .filter(hasAttachment);
+  }
+
+  function hasAttachments(list) {
+    return normalizeAttachmentList(list).length > 0;
+  }
+
+  function hasPendingAttachmentFiles(list) {
+    return normalizeAttachmentList(list).some(item => !!item.file);
+  }
+
+  function getAttachmentFileIds(list) {
+    return normalizeAttachmentList(list)
+      .map(item => String(item.attachmentFileId || "").trim())
+      .filter(Boolean);
+  }
+
+  function cloneAttachmentForStorage(item) {
+    const normalized = normalizeAttachment(item);
+    return {
+      attachmentData: normalized.attachmentData,
+      attachmentUrl: normalized.attachmentUrl,
+      attachmentPreviewUrl: normalized.attachmentPreviewUrl,
+      attachmentName: normalized.attachmentName,
+      attachmentType: normalized.attachmentType,
+      attachmentFileId: normalized.attachmentFileId,
+      attachmentMimeType: normalized.attachmentMimeType
+    };
+  }
+
+  function attachmentPayloadObject(attachments) {
+    const normalized = normalizeAttachmentList(attachments).map(cloneAttachmentForStorage);
+    const first = normalized[0] || {};
+    return {
+      attachments: normalized,
+      attachmentData: first.attachmentData || "",
+      attachmentUrl: first.attachmentUrl || "",
+      attachmentPreviewUrl: first.attachmentPreviewUrl || "",
+      attachmentName: first.attachmentName || "",
+      attachmentType: first.attachmentType || "",
+      attachmentFileId: first.attachmentFileId || "",
+      attachmentMimeType: first.attachmentMimeType || ""
+    };
+  }
+
+  function parseTaskDescription(rawDescription) {
+    const raw = String(rawDescription || "").trim();
+    if (!raw.startsWith(DESCRIPTION_IMAGE_PREFIX)) {
+      return { text: raw, attachments: [] };
+    }
+    try {
+      const jsonText = decodeURIComponent(raw.slice(DESCRIPTION_IMAGE_PREFIX.length));
+      const parsed = JSON.parse(jsonText);
+      return {
+        text: String(parsed.text || "").trim(),
+        attachments: normalizeAttachmentList(parsed)
+      };
+    } catch (err) {
+      return { text: raw, attachments: [] };
+    }
+  }
+
+  function buildTaskDescriptionPayload(text, attachments) {
+    const cleanText = String(text || "").trim();
+    const normalized = normalizeAttachmentList(attachments);
+    if (!normalized.length) return cleanText;
+    return DESCRIPTION_IMAGE_PREFIX + encodeURIComponent(JSON.stringify({
+      text: cleanText,
+      ...attachmentPayloadObject(normalized)
+    }));
+  }
+
+  function getTaskDescriptionText(rawDescription) {
+    return parseTaskDescription(rawDescription).text;
+  }
+
+  function getAttachmentOpenUrl(data) {
+    const normalized = normalizeAttachment(data);
+    return safeAttachmentUrl(normalized.attachmentUrl) || safeAttachmentDataUrl(normalized.attachmentData);
+  }
+
+  function getAttachmentPreviewUrl(data) {
+    const normalized = normalizeAttachment(data);
+    return safeAttachmentDataUrl(normalized.attachmentData) || safeAttachmentUrl(normalized.attachmentPreviewUrl) || safeAttachmentUrl(normalized.attachmentUrl);
+  }
+
+  function buildAttachmentHtmlList(attachments, mode = "description") {
+    return normalizeAttachmentList(attachments).map(item => {
+      const openUrl = getAttachmentOpenUrl(item);
+      const previewUrl = getAttachmentPreviewUrl(item);
+      if (item.attachmentType === "image" && previewUrl) {
+        const imageClass = mode === "note" ? "task-note-image" : "task-desc-image";
+        const wrapperClass = mode === "note" ? "task-note-attachment" : "task-desc-attachment";
+        const altText = mode === "note" ? "Ảnh ghi chú" : "Ảnh đính kèm";
+        const href = openUrl || previewUrl || "#";
+        return `<div class="${wrapperClass}"><a href="${href}" target="_blank" rel="noopener noreferrer"><img class="${imageClass}" src="${previewUrl}" alt="${escapeHtml(item.attachmentName || altText)}"></a></div>`;
+      }
+      const wrapperClass = mode === "note" ? "task-note-attachment" : "task-desc-attachment";
+      const linkClass = mode === "note" ? "task-note-file-link" : "task-desc-file-link";
+      const label = mode === "note" ? "PDF ghi chú" : "PDF đính kèm";
+      return `<div class="${wrapperClass}"><a class="${linkClass}" href="${openUrl || '#'}" target="_blank" rel="noopener noreferrer">${label}: ${escapeHtml(item.attachmentName || (mode === "note" ? "tep-ghi-chu.pdf" : "tep-dinh-kem.pdf"))}</a></div>`;
+    }).join("");
+  }
+
+  function buildTaskDescriptionHtml(rawDescription) {
+    const data = parseTaskDescription(rawDescription);
+    const textHtml = `<div class="task-desc">${escapeHtml(data.text || "Không có mô tả")}</div>`;
+    return textHtml + buildAttachmentHtmlList(data.attachments, "description");
+  }
+
+  function parseTaskNote(rawNote) {
+    const raw = String(rawNote || "").trim();
+    if (!raw.startsWith(NOTE_ATTACHMENT_PREFIX)) {
+      return { text: raw, attachments: [] };
+    }
+    try {
+      const jsonText = decodeURIComponent(raw.slice(NOTE_ATTACHMENT_PREFIX.length));
+      const parsed = JSON.parse(jsonText);
+      return {
+        text: String(parsed.text || "").trim(),
+        attachments: normalizeAttachmentList(parsed)
+      };
+    } catch (err) {
+      return { text: raw, attachments: [] };
+    }
+  }
+
+  function buildTaskNotePayload(text, attachments) {
+    const cleanText = String(text || "").trim();
+    const normalized = normalizeAttachmentList(attachments);
+    if (!normalized.length) return cleanText;
+    return NOTE_ATTACHMENT_PREFIX + encodeURIComponent(JSON.stringify({
+      text: cleanText,
+      ...attachmentPayloadObject(normalized)
+    }));
+  }
+
+  function getTaskNoteText(rawNote) {
+    return parseTaskNote(rawNote).text;
+  }
+
+  function buildTaskNoteHtml(rawNote) {
+    const data = parseTaskNote(rawNote);
+    const parts = [];
+    if (data.text) {
+      parts.push(`<div class="task-note-text">${escapeHtml(data.text)}</div>`);
+    }
+    const attachmentHtml = buildAttachmentHtmlList(data.attachments, "note");
+    if (attachmentHtml) parts.push(attachmentHtml);
+    return parts.join("") || `<span class="muted">-</span>`;
+  }
+
+  function buildNoteCellHtml(task) {
+    if (isDueSoon(task)) return escapeHtml("Sắp hết hạn");
+    if (task.status === "Hoàn thành") {
+      const noteData = parseTaskNote(task.note);
+      if (noteData.text || hasAttachments(noteData.attachments)) {
+        return buildTaskNoteHtml(task.note);
+      }
+    }
+    return `<span class="muted">-</span>`;
+  }
+
+  function revokePreviewUrl(url) {
+    if (String(url || "").startsWith("blob:")) {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function revokeAttachmentPreviewUrls(list) {
+    normalizeAttachmentList(list).forEach(item => revokePreviewUrl(item.previewUrl));
+  }
+
+  function renderImagePreview(containerId, attachments) {
+    const box = $(containerId);
+    if (!box) return;
+    const items = normalizeAttachmentList(attachments);
+    if (!items.length) {
+      box.innerHTML = "";
+      return;
+    }
+    box.innerHTML = items.map(item => {
+      const previewUrl = String(item.previewUrl || "").trim() || getAttachmentPreviewUrl(item);
+      if (item.attachmentType === "image" && previewUrl) {
+        return `<div class="image-preview-card"><img src="${previewUrl}" alt="${escapeHtml(item.attachmentName || "Ảnh đính kèm")}"><div class="image-preview-name">${escapeHtml(item.attachmentName || "Ảnh đính kèm")}</div></div>`;
+      }
+      return `<div class="image-preview-card"><div class="image-preview-file">PDF</div><div class="image-preview-name">${escapeHtml(item.attachmentName || "tep-dinh-kem.pdf")}</div></div>`;
+    }).join("");
+  }
+
+  function clearCreateImageSelection() {
+    revokeAttachmentPreviewUrls(state.createAttachments);
+    state.createAttachments = [];
+    if ($("taskDescriptionImage")) $("taskDescriptionImage").value = "";
+    renderImagePreview("taskImagePreview", state.createAttachments);
+  }
+
+  function clearCreateNoteAttachmentSelection() {
+    revokeAttachmentPreviewUrls(state.createNoteAttachments);
+    state.createNoteAttachments = [];
+    if ($("taskNoteFile")) $("taskNoteFile").value = "";
+    renderImagePreview("taskNotePreview", state.createNoteAttachments);
+  }
+
+  function clearEditImageSelection() {
+    revokeAttachmentPreviewUrls(state.editAttachments);
+    state.editAttachments = [];
+    if ($("editTaskDescriptionImage")) $("editTaskDescriptionImage").value = "";
+    renderImagePreview("editTaskImagePreview", state.editAttachments);
+  }
+
+  function clearEditNoteAttachmentSelection() {
+    revokeAttachmentPreviewUrls(state.editNoteAttachments);
+    state.editNoteAttachments = [];
+    if ($("editTaskNoteFile")) $("editTaskNoteFile").value = "";
+    renderImagePreview("editTaskNotePreview", state.editNoteAttachments);
+  }
+
+  function validateAttachmentFile(file) {
+    if (!file) return { ok: true };
+    const isImage = /^image\//i.test(file.type || "");
+    const isPdf = /^application\/pdf$/i.test(file.type || "") || /\.pdf$/i.test(file.name || "");
+    if (!isImage && !isPdf) {
+      return { ok: false, message: "Chỉ hỗ trợ tải lên ảnh hoặc file PDF." };
+    }
+    if ((file.size || 0) > 10 * 1024 * 1024) {
+      return { ok: false, message: "Tệp đính kèm quá lớn. Hãy dùng tệp nhỏ hơn 10MB." };
+    }
+    return { ok: true, attachmentType: isPdf ? "pdf" : "image" };
+  }
+
+  function fileToUploadPayload(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) {
+        resolve(null);
+        return;
+      }
+
+      const check = validateAttachmentFile(file);
+      if (!check.ok) {
+        reject(new Error(check.message));
+        return;
+      }
+
+      const isPdf = check.attachmentType === "pdf";
+      if (isPdf) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = String(reader.result || "");
+          const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : "";
+          if (!base64Data) {
+            reject(new Error("Không đọc được file PDF tải lên."));
+            return;
+          }
+          resolve({
+            fileName: file.name || "tep-dinh-kem.pdf",
+            mimeType: "application/pdf",
+            attachmentType: "pdf",
+            base64Data
+          });
+        };
+        reader.onerror = () => reject(new Error("Không đọc được file PDF tải lên."));
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const maxWidth = 1600;
+          const maxHeight = 1600;
+          let { width, height } = img;
+          const scale = Math.min(1, maxWidth / width, maxHeight / height);
+          width = Math.max(1, Math.round(width * scale));
+          height = Math.max(1, Math.round(height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+          let quality = 0.9;
+          let dataUrl = canvas.toDataURL("image/jpeg", quality);
+          while (dataUrl.length > 4_500_000 && quality > 0.5) {
+            quality -= 0.08;
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+          }
+          const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : "";
+          if (!base64Data) {
+            reject(new Error("Không đọc được ảnh tải lên."));
+            return;
+          }
+          resolve({
+            fileName: (file.name || "anh-dinh-kem.jpg").replace(/\.[^.]+$/, '') + ".jpg",
+            mimeType: "image/jpeg",
+            attachmentType: "image",
+            base64Data
+          });
+        };
+        img.onerror = () => reject(new Error("Không đọc được ảnh tải lên."));
+        img.src = reader.result;
+      };
+      reader.onerror = () => reject(new Error("Không đọc được tệp ảnh."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function appendAttachmentsFromFiles(existingAttachments, files, defaultBaseName = "tep-dinh-kem") {
+    const next = normalizeAttachmentList(existingAttachments);
+    Array.from(files || []).forEach(file => {
+      if (!file) return;
+      const check = validateAttachmentFile(file);
+      if (!check.ok) throw new Error(check.message);
+      next.push(normalizeAttachment({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        attachmentName: file.name || defaultBaseName,
+        attachmentType: check.attachmentType,
+        attachmentMimeType: file.type || (check.attachmentType === "pdf" ? "application/pdf" : "image/jpeg")
+      }));
+    });
+    return next;
+  }
+
+  function setCreateAttachmentsFromFiles(files) {
+    state.createAttachments = appendAttachmentsFromFiles(state.createAttachments, files, "tep-dinh-kem");
+    renderImagePreview("taskImagePreview", state.createAttachments);
+  }
+
+  function setCreateNoteAttachmentsFromFiles(files) {
+    state.createNoteAttachments = appendAttachmentsFromFiles(state.createNoteAttachments, files, "tep-ghi-chu");
+    renderImagePreview("taskNotePreview", state.createNoteAttachments);
+  }
+
+  function setEditAttachmentsFromFiles(files) {
+    state.editAttachments = appendAttachmentsFromFiles(state.editAttachments, files, "tep-dinh-kem");
+    renderImagePreview("editTaskImagePreview", state.editAttachments);
+  }
+
+  function setEditNoteAttachmentsFromFiles(files) {
+    state.editNoteAttachments = appendAttachmentsFromFiles(state.editNoteAttachments, files, "tep-ghi-chu");
+    renderImagePreview("editTaskNotePreview", state.editNoteAttachments);
+  }
+
+  async function handleCreateImageUpload() {
+    const input = $("taskDescriptionImage");
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+    try {
+      setCreateAttachmentsFromFiles(files);
+    } catch (err) {
+      alert(err.message || "Không tải được tệp đính kèm.");
+    } finally {
+      if (input) input.value = "";
+    }
+  }
+
+  async function handleCreateNoteFileUpload() {
+    const input = $("taskNoteFile");
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+    try {
+      setCreateNoteAttachmentsFromFiles(files);
+    } catch (err) {
+      alert(err.message || "Không tải được tệp ghi chú.");
+    } finally {
+      if (input) input.value = "";
+    }
+  }
+
+  async function handleEditImageUpload() {
+    const input = $("editTaskDescriptionImage");
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+    try {
+      setEditAttachmentsFromFiles(files);
+    } catch (err) {
+      alert(err.message || "Không tải được tệp đính kèm.");
+    } finally {
+      if (input) input.value = "";
+    }
+  }
+
+  async function handleEditNoteFileUpload() {
+    const input = $("editTaskNoteFile");
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+    try {
+      setEditNoteAttachmentsFromFiles(files);
+    } catch (err) {
+      alert(err.message || "Không tải được tệp ghi chú.");
+    } finally {
+      if (input) input.value = "";
+    }
   }
 
   function setMain(title, sub) {
@@ -976,10 +1652,8 @@
 
   function normalizeTaskStatus(value) {
     const v = String(value || "").trim();
-    if (["Đang thực hiện", "Dang thuc hien"].includes(v)) return "Đang thực hiện";
     if (["Hoàn thành", "Hoan thanh"].includes(v)) return "Hoàn thành";
-    if (["Tạm dừng", "Tam dung"].includes(v)) return "Tạm dừng";
-    return "Chưa thực hiện";
+    return "Đang thực hiện";
   }
 
   function normalizeDate(value) {
@@ -1081,7 +1755,7 @@
   }
 
   function sortTasks(tasks) {
-    const statusOrder = { "Đang thực hiện": 0, "Chưa thực hiện": 1, "Tạm dừng": 2, "Hoàn thành": 3 };
+    const statusOrder = { "Đang thực hiện": 0, "Hoàn thành": 1 };
     return [...tasks].sort((a, b) => {
       const statusDiff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
       if (statusDiff !== 0) return statusDiff;
@@ -1125,7 +1799,7 @@
 
   function getDisplayNote(task) {
     if (isDueSoon(task)) return "Sắp hết hạn";
-    if (task.status === "Hoàn thành" && task.note) return task.note;
+    if (task.status === "Hoàn thành") return getTaskNoteText(task.note);
     return "";
   }
 
@@ -1249,10 +1923,8 @@
 
 
   function statusClass(status) {
-    if (status === "Đang thực hiện") return "state-doing";
     if (status === "Hoàn thành") return "state-done";
-    if (status === "Tạm dừng") return "state-hold";
-    return "state-todo";
+    return "state-doing";
   }
 
   function updateSyncUI() {
@@ -1328,7 +2000,7 @@
 
     return state.tasks.filter(task => {
       const dueSoon = isDueSoon(task);
-      const haystack = [task.title, task.description, task.assignee, task.note, formatWeek(task.assignedWeek), dueSoon ? "sắp hết hạn" : ""].join(" ").toLowerCase();
+      const haystack = [task.title, getTaskDescriptionText(task.description), task.assignee, getTaskNoteText(task.note), formatWeek(task.assignedWeek), dueSoon ? "sắp hết hạn" : ""].join(" ").toLowerCase();
       if (keyword && !haystack.includes(keyword)) return false;
       if (assignee && task.assignee !== assignee) return false;
       if (week && task.assignedWeek !== week) return false;
@@ -1377,20 +2049,20 @@
     tasks.forEach((task, idx) => {
       const overdueText = isOverdue(task) ? ' <span class="state-tag state-overdue">Quá hạn</span>' : "";
       const dueSoonClass = isDueSoon(task) ? 'due-soon-date' : '';
-      const noteText = getDisplayNote(task);
+      const noteHtml = buildNoteCellHtml(task);
       const tr = document.createElement("tr");
       if (isDueSoon(task)) tr.classList.add("task-row-soon");
       tr.innerHTML = `
         <td>${idx + 1}</td>
         <td>
           <div class="task-title">${escapeHtml(task.title)}</div>
-          <div class="task-desc">${escapeHtml(task.description || "Không có mô tả")}</div>
+          ${buildTaskDescriptionHtml(task.description)}
         </td>
         <td>${escapeHtml(task.assignee || "-")}</td>
         <td>${escapeHtml(formatWeek(task.assignedWeek))}</td>
         <td><span class="${dueSoonClass}">${escapeHtml(formatDate(task.dueDate))}</span>${overdueText}</td>
         <td><span class="state-tag ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
-        <td class="task-note-cell">${noteText ? escapeHtml(noteText) : `<span class="muted">-</span>`}</td>
+        <td class="task-note-cell">${noteHtml}</td>
       `;
       body.appendChild(tr);
     });
@@ -1406,7 +2078,7 @@
     }
 
     state.tasks.forEach((task, idx) => {
-      const noteText = getDisplayNote(task);
+      const noteHtml = buildNoteCellHtml(task);
       const dueSoonClass = isDueSoon(task) ? 'due-soon-date' : '';
       const tr = document.createElement("tr");
       if (isDueSoon(task)) tr.classList.add("task-row-soon");
@@ -1414,13 +2086,13 @@
         <td>${idx + 1}</td>
         <td>
           <div class="task-title">${escapeHtml(task.title)}</div>
-          <div class="task-desc">${escapeHtml(task.assignee || "Chưa phân công")}</div>
+          ${buildTaskDescriptionHtml(task.description)}
         </td>
         <td>${escapeHtml(task.assignee || "-")}</td>
         <td>${escapeHtml(formatWeek(task.assignedWeek))}</td>
         <td><span class="${dueSoonClass}">${escapeHtml(formatDate(task.dueDate))}</span></td>
         <td><span class="state-tag ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
-        <td class="task-note-cell">${noteText ? escapeHtml(noteText) : `<span class="muted">-</span>`}</td>
+        <td class="task-note-cell">${noteHtml}</td>
         <td>
           <div class="flex">
             <button class="secondary" data-action="edit" data-id="${escapeHtml(task.id)}">Sửa</button>
@@ -1467,9 +2139,11 @@
     toggleCustomAssigneeInput();
     setDefaultAssignedWeek();
     $("taskDueDate").value = "";
-    $("taskStatus").value = "Chưa thực hiện";
+    $("taskStatus").value = "Đang thực hiện";
     $("taskDescription").value = "";
+    clearCreateImageSelection();
     $("taskNote").value = "";
+    clearCreateNoteAttachmentSelection();
     $("adminSaveStatus").className = "status info";
     $("adminSaveStatus").textContent = "Sẵn sàng cập nhật dữ liệu.";
   }
@@ -1484,25 +2158,39 @@
     $("editTaskAssignedWeek").value = task.assignedWeek || "";
     updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
     $("editTaskDueDate").value = task.dueDate;
-    $("editTaskStatus").value = task.status;
-    $("editTaskDescription").value = task.description;
-    $("editTaskNote").value = task.note;
+    $("editTaskStatus").value = normalizeTaskStatus(task.status);
+    const descriptionData = parseTaskDescription(task.description);
+    $("editTaskDescription").value = descriptionData.text;
+    revokeAttachmentPreviewUrls(state.editAttachments);
+    state.editAttachments = normalizeAttachmentList(descriptionData.attachments);
+    renderImagePreview("editTaskImagePreview", state.editAttachments);
+    const noteData = parseTaskNote(task.note);
+    $("editTaskNote").value = noteData.text;
+    revokeAttachmentPreviewUrls(state.editNoteAttachments);
+    state.editNoteAttachments = normalizeAttachmentList(noteData.attachments);
+    renderImagePreview("editTaskNotePreview", state.editNoteAttachments);
     $("editTaskModalError").textContent = "";
     $("editTaskModal").classList.remove("hidden");
+    const modalBody = $("editTaskModal").querySelector(".modal-body");
+    if (modalBody) modalBody.scrollTop = 0;
     setTimeout(() => $("editTaskTitle").focus(), 30);
   }
 
   function closeEditTaskModal() {
     $("editTaskModal").classList.add("hidden");
+    const modalBody = $("editTaskModal").querySelector(".modal-body");
+    if (modalBody) modalBody.scrollTop = 0;
     $("editTaskId").value = "";
     $("editTaskTitle").value = "";
     $("editTaskAssignee").value = "";
     $("editTaskAssignedWeek").value = "";
     updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay");
     $("editTaskDueDate").value = "";
-    $("editTaskStatus").value = "Chưa thực hiện";
+    $("editTaskStatus").value = "Đang thực hiện";
     $("editTaskDescription").value = "";
+    clearEditImageSelection();
     $("editTaskNote").value = "";
+    clearEditNoteAttachmentSelection();
     $("editTaskModalError").textContent = "";
   }
 
@@ -1525,6 +2213,56 @@
     }
   }
 
+  async function uploadAttachmentRemote(file) {
+    if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
+      return { ok: false, localOnly: true, message: "Chưa cấu hình Apps Script" };
+    }
+
+    try {
+      const payload = await fileToUploadPayload(file);
+      if (!payload) {
+        return { ok: true };
+      }
+      const resp = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "uploadAttachment",
+          fileName: payload.fileName,
+          mimeType: payload.mimeType,
+          attachmentType: payload.attachmentType,
+          base64Data: payload.base64Data
+        }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      });
+      const data = await resp.json().catch(() => ({ ok: false, message: "Không nhận được phản hồi hợp lệ khi tải tệp lên." }));
+      return data && typeof data.ok !== "undefined" ? data : { ok: false, message: "Không nhận được phản hồi hợp lệ khi tải tệp lên." };
+    } catch (err) {
+      console.error("Không tải được tệp lên Apps Script:", err);
+      return { ok: false, message: err.message || "Không tải được tệp lên Google Drive" };
+    }
+  }
+
+  async function deleteAttachmentRemote(fileId) {
+    const id = String(fileId || "").trim();
+    if (!id) return { ok: true };
+    if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
+      return { ok: false, localOnly: true, message: "Chưa cấu hình Apps Script" };
+    }
+
+    try {
+      const resp = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "deleteAttachment", fileId: id }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      });
+      const data = await resp.json().catch(() => ({ ok: true }));
+      return data && typeof data.ok !== "undefined" ? data : { ok: true };
+    } catch (err) {
+      console.error("Không xóa được tệp trên Apps Script:", err);
+      return { ok: false, message: err.message || "Không xóa được tệp trên Google Drive" };
+    }
+  }
+
   async function deleteTaskRemote(taskId) {
     if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
       return { ok: false, localOnly: true, message: "Chưa cấu hình Apps Script" };
@@ -1544,15 +2282,44 @@
     }
   }
 
+  async function uploadAttachmentList(attachments) {
+    const normalized = normalizeAttachmentList(attachments);
+    const uploadedItems = [];
+
+    for (const item of normalized) {
+      if (!item.file) {
+        uploadedItems.push(normalizeAttachment(item));
+        continue;
+      }
+
+      const uploaded = await uploadAttachmentRemote(item.file);
+      if (!uploaded.ok) {
+        return { ok: false, message: uploaded.message || "Lỗi chưa xác định" };
+      }
+
+      revokePreviewUrl(item.previewUrl);
+      uploadedItems.push(normalizeAttachment({
+        attachmentUrl: uploaded.url,
+        attachmentPreviewUrl: uploaded.previewUrl || uploaded.url,
+        attachmentName: uploaded.name || item.attachmentName,
+        attachmentType: uploaded.attachmentType || item.attachmentType,
+        attachmentFileId: uploaded.fileId,
+        attachmentMimeType: uploaded.mimeType || item.attachmentMimeType
+      }));
+    }
+
+    return { ok: true, attachments: uploadedItems };
+  }
+
   async function handleSaveTask() {
     const id = makeId();
     const title = $("taskTitle").value.trim();
     const assignee = getCreateTaskAssignee();
     const assignedWeek = $("taskAssignedWeek").value || getTodayAssignedWeek();
     const dueDate = $("taskDueDate").value;
-    const status = $("taskStatus").value.trim();
-    const description = $("taskDescription").value.trim();
-    const note = $("taskNote").value.trim();
+    const status = "Đang thực hiện";
+    const descriptionText = $("taskDescription").value.trim();
+    const noteText = $("taskNote").value.trim();
 
     if (!title) {
       alert("Vui lòng nhập tên công việc.");
@@ -1563,6 +2330,42 @@
       return;
     }
 
+    const statusBox = $("adminSaveStatus");
+    statusBox.className = "status info";
+    statusBox.textContent = hasPendingAttachmentFiles(state.createAttachments) || hasPendingAttachmentFiles(state.createNoteAttachments)
+      ? "Đang tải tệp đính kèm lên Google Drive..."
+      : "Đang lưu công việc...";
+
+    let attachments = normalizeAttachmentList(state.createAttachments);
+    let noteAttachments = normalizeAttachmentList(state.createNoteAttachments);
+    if (hasPendingAttachmentFiles(attachments)) {
+      const uploaded = await uploadAttachmentList(attachments);
+      if (!uploaded.ok) {
+        statusBox.className = "status warning";
+        statusBox.textContent = "Không tải được tệp đính kèm lên Google Drive: " + (uploaded.message || "Lỗi chưa xác định") + ". Công việc chưa được lưu.";
+        setStatus("warning", "Không tải được tệp đính kèm lên Google Drive nên chưa lưu công việc.");
+        return;
+      }
+      attachments = uploaded.attachments;
+      state.createAttachments = attachments;
+      renderImagePreview("taskImagePreview", state.createAttachments);
+    }
+
+    if (hasPendingAttachmentFiles(noteAttachments)) {
+      const uploadedNote = await uploadAttachmentList(noteAttachments);
+      if (!uploadedNote.ok) {
+        statusBox.className = "status warning";
+        statusBox.textContent = "Không tải được tệp ghi chú lên Google Drive: " + (uploadedNote.message || "Lỗi chưa xác định") + ". Công việc chưa được lưu.";
+        setStatus("warning", "Không tải được tệp ghi chú lên Google Drive nên chưa lưu công việc.");
+        return;
+      }
+      noteAttachments = uploadedNote.attachments;
+      state.createNoteAttachments = noteAttachments;
+      renderImagePreview("taskNotePreview", state.createNoteAttachments);
+    }
+
+    const description = buildTaskDescriptionPayload(descriptionText, attachments);
+    const note = buildTaskNotePayload(noteText, noteAttachments);
     const now = new Date().toISOString();
     const task = normalizeTask({
       id,
@@ -1584,7 +2387,6 @@
     saveLocalTasks(state.tasks);
     renderAll();
 
-    const statusBox = $("adminSaveStatus");
     statusBox.className = "status info";
     statusBox.textContent = "Đang lưu công việc...";
 
@@ -1596,15 +2398,15 @@
       statusBox.textContent = "Đã thêm công việc mới thành công.";
       setStatus("success", "Đã đồng bộ dữ liệu công việc lên hệ thống dùng chung.");
       await loadTasks(false);
+      resetForm();
     } else {
       state.syncMode = "local";
       updateSyncUI();
       statusBox.className = "status warning";
       statusBox.textContent = "Đã thêm công việc trên máy này nhưng chưa đồng bộ tập trung: " + (remote.message || "Lỗi chưa xác định") + ".";
       setStatus("warning", "Đã lưu công việc trên máy này nhưng chưa đồng bộ lên hệ thống dùng chung.");
+      resetForm();
     }
-
-    resetForm();
   }
 
   async function handleSaveEditedTask() {
@@ -1613,9 +2415,9 @@
     const assignee = $("editTaskAssignee").value.trim();
     const assignedWeek = $("editTaskAssignedWeek").value;
     const dueDate = $("editTaskDueDate").value;
-    const status = $("editTaskStatus").value.trim();
-    const description = $("editTaskDescription").value.trim();
-    const note = $("editTaskNote").value.trim();
+    const status = normalizeTaskStatus($("editTaskStatus").value.trim());
+    const descriptionText = $("editTaskDescription").value.trim();
+    const noteText = $("editTaskNote").value.trim();
 
     const existing = state.tasks.find(task => task.id === id);
     if (!existing) {
@@ -1632,6 +2434,45 @@
     }
 
     $("editTaskModalError").textContent = "";
+    const oldAttachments = normalizeAttachmentList(parseTaskDescription(existing.description).attachments);
+    const oldNoteAttachments = normalizeAttachmentList(parseTaskNote(existing.note).attachments);
+    let attachments = normalizeAttachmentList(state.editAttachments);
+    let noteAttachments = normalizeAttachmentList(state.editNoteAttachments);
+
+    const statusBox = $("adminSaveStatus");
+    statusBox.className = "status info";
+    statusBox.textContent = hasPendingAttachmentFiles(attachments) || hasPendingAttachmentFiles(noteAttachments)
+      ? "Đang tải tệp đính kèm mới lên Google Drive..."
+      : "Đang lưu chỉnh sửa công việc...";
+
+    if (hasPendingAttachmentFiles(attachments)) {
+      const uploaded = await uploadAttachmentList(attachments);
+      if (!uploaded.ok) {
+        $("editTaskModalError").textContent = "Không tải được tệp đính kèm nội dung lên Google Drive: " + (uploaded.message || "Lỗi chưa xác định");
+        statusBox.className = "status warning";
+        statusBox.textContent = "Không tải được tệp đính kèm mới lên Google Drive.";
+        return;
+      }
+      attachments = uploaded.attachments;
+      state.editAttachments = attachments;
+      renderImagePreview("editTaskImagePreview", state.editAttachments);
+    }
+
+    if (hasPendingAttachmentFiles(noteAttachments)) {
+      const uploadedNote = await uploadAttachmentList(noteAttachments);
+      if (!uploadedNote.ok) {
+        $("editTaskModalError").textContent = "Không tải được tệp đính kèm ghi chú lên Google Drive: " + (uploadedNote.message || "Lỗi chưa xác định");
+        statusBox.className = "status warning";
+        statusBox.textContent = "Không tải được tệp ghi chú lên Google Drive.";
+        return;
+      }
+      noteAttachments = uploadedNote.attachments;
+      state.editNoteAttachments = noteAttachments;
+      renderImagePreview("editTaskNotePreview", state.editNoteAttachments);
+    }
+
+    const description = buildTaskDescriptionPayload(descriptionText, attachments);
+    const note = buildTaskNotePayload(noteText, noteAttachments);
     const task = normalizeTask({
       id,
       title,
@@ -1653,7 +2494,6 @@
     renderAll();
     closeEditTaskModal();
 
-    const statusBox = $("adminSaveStatus");
     statusBox.className = "status info";
     statusBox.textContent = "Đang lưu chỉnh sửa công việc...";
 
@@ -1664,6 +2504,16 @@
       statusBox.className = "status success";
       statusBox.textContent = "Đã cập nhật công việc thành công.";
       setStatus("success", "Đã đồng bộ dữ liệu công việc lên hệ thống dùng chung.");
+
+      const newAttachmentIds = new Set(getAttachmentFileIds(attachments));
+      for (const fileId of getAttachmentFileIds(oldAttachments)) {
+        if (!newAttachmentIds.has(fileId)) await deleteAttachmentRemote(fileId);
+      }
+      const newNoteAttachmentIds = new Set(getAttachmentFileIds(noteAttachments));
+      for (const fileId of getAttachmentFileIds(oldNoteAttachments)) {
+        if (!newNoteAttachmentIds.has(fileId)) await deleteAttachmentRemote(fileId);
+      }
+
       await loadTasks(false);
     } else {
       state.syncMode = "local";
@@ -1680,6 +2530,9 @@
     const ok = confirm('Bạn chắc chắn muốn xóa công việc "' + task.title + '"?');
     if (!ok) return;
 
+    const attachments = normalizeAttachmentList(parseTaskDescription(task.description).attachments);
+    const noteAttachments = normalizeAttachmentList(parseTaskNote(task.note).attachments);
+
     state.tasks = sortTasks(state.tasks.filter(item => item.id !== taskId));
     saveLocalTasks(state.tasks);
     renderAll();
@@ -1695,13 +2548,19 @@
       statusBox.className = "status success";
       statusBox.textContent = "Đã xóa công việc thành công.";
       setStatus("success", "Đã xóa công việc trên hệ thống dùng chung.");
+      for (const fileId of getAttachmentFileIds(attachments)) {
+        await deleteAttachmentRemote(fileId);
+      }
+      for (const fileId of getAttachmentFileIds(noteAttachments)) {
+        await deleteAttachmentRemote(fileId);
+      }
       await loadTasks(false);
     } else {
       state.syncMode = "local";
       updateSyncUI();
       statusBox.className = "status warning";
-      statusBox.textContent = "Đã xóa trên máy này nhưng chưa xóa được trên hệ thống tập trung: " + (remote.message || "Lỗi chưa xác định") + ".";
-      setStatus("warning", "Đã cập nhật dữ liệu cục bộ trên máy này, chưa đồng bộ lên hệ thống dùng chung.");
+      statusBox.textContent = "Đã xóa công việc trên máy này nhưng chưa đồng bộ tập trung: " + (remote.message || "Lỗi chưa xác định") + ".";
+      setStatus("warning", "Đã xóa công việc trên máy này nhưng chưa đồng bộ lên hệ thống dùng chung.");
     }
   }
 
@@ -1719,8 +2578,8 @@
         <td>${escapeHtml(formatWeek(task.assignedWeek))}</td>
         <td>${escapeHtml(formatDate(task.dueDate))}</td>
         <td>${escapeHtml(task.status)}</td>
-        <td>${escapeHtml(task.description || "")}</td>
-        <td>${escapeHtml(task.note || "")}</td>
+        <td>${escapeHtml(getTaskDescriptionText(task.description) || "")}${hasAttachment(parseTaskDescription(task.description)) ? " (Có tệp đính kèm)" : ""}</td>
+        <td>${escapeHtml(getTaskNoteText(task.note) || "")}${hasAttachment(parseTaskNote(task.note)) ? " (Có tệp đính kèm)" : ""}</td>
         <td>${escapeHtml(formatDateTime(task.updatedAt))}</td>
       </tr>
     `).join("");
@@ -1778,7 +2637,7 @@ th{font-weight:700;background:#f1f1f1}
 
   function buildPrintTableRows(tasks) {
     return tasks.map((task, idx) => {
-      const noteText = getDisplayNote(task) || "-";
+      const noteText = getDisplayNote(task) || (task.status === "Hoàn thành" && hasAttachment(parseTaskNote(task.note)) ? "Có tệp đính kèm" : "-");
       return `
         <tr>
           <td>${idx + 1}</td>
@@ -1992,6 +2851,14 @@ th{font-weight:700;background:#f1f1f1}
   $("btnSaveTask").addEventListener("click", handleSaveTask);
   $("btnResetForm").addEventListener("click", resetForm);
   $("taskAssignee").addEventListener("change", toggleCustomAssigneeInput);
+  $("taskDescriptionImage").addEventListener("change", handleCreateImageUpload);
+  $("taskNoteFile").addEventListener("change", handleCreateNoteFileUpload);
+  $("editTaskDescriptionImage").addEventListener("change", handleEditImageUpload);
+  $("editTaskNoteFile").addEventListener("change", handleEditNoteFileUpload);
+  $("btnRemoveTaskImage").addEventListener("click", clearCreateImageSelection);
+  $("btnRemoveTaskNoteFile").addEventListener("click", clearCreateNoteAttachmentSelection);
+  $("btnRemoveEditTaskImage").addEventListener("click", clearEditImageSelection);
+  $("btnRemoveEditTaskNoteFile").addEventListener("click", clearEditNoteAttachmentSelection);
   $("taskAssignedWeek").addEventListener("input", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
   $("taskAssignedWeek").addEventListener("change", () => updateWeekDisplay("taskAssignedWeek", "taskAssignedWeekDisplay", "taskAssignedWeekInlineDisplay"));
   $("editTaskAssignedWeek").addEventListener("input", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
@@ -2036,10 +2903,22 @@ th{font-weight:700;background:#f1f1f1}
   $("editTaskModal").addEventListener("click", (event) => {
     if (event.target === $("editTaskModal")) closeEditTaskModal();
   });
+  const editModalCard = $("editTaskModal").querySelector(".modal-card");
+  const editModalBody = $("editTaskModal").querySelector(".modal-body");
+  if (editModalCard && editModalBody) {
+    editModalCard.addEventListener("wheel", (event) => {
+      if ($("editTaskModal").classList.contains("hidden")) return;
+      if (editModalBody.scrollHeight <= editModalBody.clientHeight) return;
+      if (!event.target.closest(".modal-body")) {
+        event.preventDefault();
+        editModalBody.scrollTop += event.deltaY;
+      }
+    }, { passive: false });
+  }
   ["taskTitle", "taskAssignee", "taskAssigneeCustom", "taskAssignedWeek", "taskDueDate", "taskStatus", "taskDescription", "taskNote"].forEach(id => {
     $(id).addEventListener("keydown", (event) => handleEnterToSave(event, handleSaveTask));
   });
-  ["editTaskTitle", "editTaskAssignee", "editTaskAssignedWeek", "editTaskDueDate", "editTaskStatus", "editTaskDescription", "editTaskNote"].forEach(id => {
+  ["editTaskTitle", "editTaskAssignee", "editTaskAssignedWeek", "editTaskDueDate", "editTaskStatus", "editTaskDescription", "editTaskNote", "editTaskNoteFile"].forEach(id => {
     $(id).addEventListener("keydown", (event) => handleEnterToSave(event, handleSaveEditedTask, { onEscape: closeEditTaskModal }));
   });
 
