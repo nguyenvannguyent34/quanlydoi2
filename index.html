@@ -406,10 +406,14 @@
     }
     th, td{
       border-bottom:1px solid #e6ebf3;
+      border-right:1px solid rgba(221,227,238,.6);
       padding:10px 8px;
       text-align:center;
       font-size:15px;
       vertical-align:middle;
+    }
+    tr > *:last-child{
+      border-right:none;
     }
     th{
       background:#f8fafc;
@@ -443,6 +447,18 @@
     }
     .task-note-cell{
       min-width:140px;
+    }
+    .week-stacked{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      line-height:1.2;
+      white-space:nowrap;
+      min-width:82px;
+    }
+    .week-stacked .month-line{
+      margin-top:2px;
     }
     .task-note-text{
       line-height:1.45;
@@ -801,7 +817,7 @@
 
               
               <div class="table-wrap">
-                <table>
+                <table class="viewer-task-table">
                   <thead>
                     <tr>
                       <th>STT</th>
@@ -1826,6 +1842,13 @@
     return `Tuần ${data.weekOfMonth}/Tháng ${data.month}`;
   }
 
+  function formatWeekStackedHtml(weekString) {
+    if (!weekString) return '<span class="muted">-</span>';
+    const data = getWeekMonthDisplayData(weekString);
+    if (!data) return escapeHtml(weekString);
+    return `<div class="week-stacked"><span>Tuần ${data.weekOfMonth}</span><span class="month-line">/Tháng ${data.month}</span></div>`;
+  }
+
   function updateWeekDisplay(inputId, outputId, inlineId) {
     const input = $(inputId);
     const output = $(outputId);
@@ -2059,7 +2082,7 @@
           ${buildTaskDescriptionHtml(task.description)}
         </td>
         <td>${escapeHtml(task.assignee || "-")}</td>
-        <td>${escapeHtml(formatWeek(task.assignedWeek))}</td>
+        <td>${formatWeekStackedHtml(task.assignedWeek)}</td>
         <td><span class="${dueSoonClass}">${escapeHtml(formatDate(task.dueDate))}</span>${overdueText}</td>
         <td><span class="state-tag ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
         <td class="task-note-cell">${noteHtml}</td>
@@ -2089,7 +2112,7 @@
           ${buildTaskDescriptionHtml(task.description)}
         </td>
         <td>${escapeHtml(task.assignee || "-")}</td>
-        <td>${escapeHtml(formatWeek(task.assignedWeek))}</td>
+        <td>${formatWeekStackedHtml(task.assignedWeek)}</td>
         <td><span class="${dueSoonClass}">${escapeHtml(formatDate(task.dueDate))}</span></td>
         <td><span class="state-tag ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
         <td class="task-note-cell">${noteHtml}</td>
@@ -2679,11 +2702,13 @@ th{font-weight:700;background:#f1f1f1}
 <title>${reportTitle}</title>
 <style>
   body{font-family:"Times New Roman",Times,serif;margin:28px;color:#111;}
-  .head{text-align:center;line-height:1.45;margin-bottom:18px;}
-  .head .l1,.head .l2{font-weight:700;text-transform:uppercase;}
-  .head .l1{font-size:18px;}
-  .head .l2{font-size:17px;}
-  h1{text-align:center;font-size:24px;margin:16px 0 8px;}
+  .admin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:18px;}
+  .admin-head .col{width:48%;text-align:center;line-height:1.4;}
+  .admin-head .line1,.admin-head .line2{font-weight:700;}
+  .admin-head .line1{text-transform:uppercase;font-size:17px;}
+  .admin-head .line2{font-size:16px;}
+  .admin-head .line-rule{width:120px;border-top:1px solid #111;margin:6px auto 0;}
+  h1{text-align:center;font-size:24px;margin:12px 0 8px;}
   .meta{text-align:center;font-size:14px;margin-bottom:16px;line-height:1.6;}
   .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
   .stats span{border:1px solid #333;padding:6px 10px;border-radius:999px;font-size:14px;}
@@ -2694,9 +2719,17 @@ th{font-weight:700;background:#f1f1f1}
 </style>
 </head>
 <body>
-  <div class="head">
-    <div class="l1">Phòng Cảnh sát PCCC và CNCH</div>
-    <div class="l2">Đội Công tác phòng cháy</div>
+  <div class="admin-head">
+    <div class="col left">
+      <div class="line1">PHÒNG PC07</div>
+      <div class="line2">ĐỘI CÔNG TÁC PHÒNG CHÁY</div>
+      <div class="line-rule"></div>
+    </div>
+    <div class="col right">
+      <div class="line1">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+      <div class="line2">Độc lập - Tự do - Hạnh phúc</div>
+      <div class="line-rule"></div>
+    </div>
   </div>
   <h1>${reportTitle}</h1>
   <div class="meta">Ngày in: ${escapeHtml(new Date().toLocaleString("vi-VN"))}${rangeText ? `<br>${escapeHtml(rangeText)}` : ""}</div>
