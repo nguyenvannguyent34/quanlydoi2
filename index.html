@@ -60,8 +60,9 @@
     .top-unit .line1{font-size:20px;}
     .top-unit .line2{font-size:19px;}
     .topbar{
-      max-width:1180px;
-      margin:26px auto 0;
+      width:calc(100vw - 32px);
+      max-width:none;
+      margin:26px 16px 0;
       background:linear-gradient(90deg, var(--primary-dark), var(--primary));
       color:#fff;
       padding:18px 24px;
@@ -105,9 +106,10 @@
       font-size:15px;
     }
     .container{
-      max-width:1180px;
-      margin:28px auto;
-      padding:0 16px 40px;
+      width:calc(100vw - 32px);
+      max-width:none;
+      margin:28px 16px;
+      padding:0 0 40px;
     }
     .grid{
       display:grid;
@@ -318,6 +320,13 @@
       align-items:end;
       margin:10px 0 16px;
     }
+    .admin-filter-grid{
+      display:grid;
+      grid-template-columns:1.8fr 1fr 1fr auto;
+      gap:12px;
+      align-items:end;
+      margin:12px 0 16px;
+    }
     .task-layout{
       display:grid;
       grid-template-columns:1.05fr .95fr;
@@ -337,6 +346,12 @@
     }
     .compact-form-panel textarea{
       min-height:72px;
+    }
+    .compact-form-panel .split-field textarea{
+      min-height:58px;
+    }
+    .compact-form-panel .split-field .attachment-box{
+      min-height:58px;
     }
     .panel-box{
       border:1px solid #e4e9f1;
@@ -544,7 +559,7 @@
       overflow:hidden;
     }
     .modal-card.modal-large{
-      width:min(820px, 100%);
+      width:min(96vw, 1800px);
     }
     .modal-card .form-grid{
       margin-top:4px;
@@ -592,43 +607,28 @@
       font-size:13px;
       line-height:1.45;
     }
-    .image-preview-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-      gap:10px;
-      margin-top:12px;
+    .attachment-file-list{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      flex:1;
+      min-width:0;
     }
-    .image-preview-card{
-      border:1px solid #e1e7f0;
-      border-radius:14px;
-      background:#fff;
-      padding:10px;
-      text-align:center;
-    }
-    .image-preview-card img{
-      max-width:100%;
-      max-height:220px;
-      border-radius:10px;
-      display:block;
-      margin:0 auto 8px;
-    }
-    .image-preview-file{
+    .attachment-file-item{
       display:inline-flex;
       align-items:center;
-      justify-content:center;
-      min-height:86px;
-      width:100%;
-      padding:12px;
-      border-radius:12px;
+      max-width:100%;
+      padding:8px 10px;
+      border-radius:10px;
       background:#f5f7fa;
       border:1px solid #d9e0ea;
-      font-weight:700;
       color:#475467;
-    }
-    .image-preview-name{
       font-size:13px;
-      color:#475467;
-      word-break:break-word;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .task-desc-attachment{
       margin-top:8px;
@@ -658,6 +658,73 @@
       font-weight:700;
       word-break:break-word;
     }
+
+    .alert-columns{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      margin-top:14px;
+      align-items:start;
+    }
+    .alert-column{
+      min-width:0;
+      border:1px solid #e1e7f0;
+      border-radius:16px;
+      background:#fbfcfe;
+      padding:14px;
+      height:100%;
+    }
+    .alert-summary-card{
+      border:1px solid #e4e9f1;
+      border-radius:16px;
+      padding:14px 16px;
+      background:#fbfcfe;
+      margin-bottom:12px;
+    }
+    .alert-summary-card h4{
+      margin:0 0 6px;
+      font-size:20px;
+    }
+    .alert-summary-card.overdue{
+      background:#fff1f1;
+      border-color:#f0c7c7;
+    }
+    .alert-summary-card.due-soon{
+      background:#fff4f7;
+      border-color:#f4c7d5;
+    }
+    .alert-summary-count{
+      font-size:28px;
+      font-weight:700;
+      margin-top:4px;
+    }
+    .alert-list{
+      margin-top:12px;
+      border:1px solid #e1e7f0;
+      border-radius:14px;
+      overflow:auto;
+      background:#fff;
+      max-height:58vh;
+    }
+    .alert-list table{
+      margin-top:0;
+    }
+    .alert-empty{
+      padding:18px 14px;
+      text-align:center;
+      color:var(--muted);
+    }
+    .alert-caption{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+    .alert-column-title{
+      margin:0 0 8px;
+      font-size:20px;
+    }
+
     .copyright{
       text-align:center;
       color:#fff;
@@ -667,6 +734,7 @@
     }
     @media (max-width: 1120px){
       .filter-grid{grid-template-columns:1fr 1fr;}
+      .admin-filter-grid{grid-template-columns:1fr 1fr;}
       .task-layout{grid-template-columns:1fr}
       .compact-form-panel .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
@@ -681,19 +749,16 @@
       .topbar h1{font-size:22px}
       .top-unit .line1{font-size:17px}
       .top-unit .line2{font-size:16px}
-      .filter-grid,.form-grid,.compact-form-panel .form-grid{grid-template-columns:1fr}
+      .filter-grid,.admin-filter-grid,.form-grid,.compact-form-panel .form-grid,.alert-columns{grid-template-columns:1fr}
       .split-field{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .split-field textarea{min-height:96px}
       .split-field .attachment-box{min-height:96px;padding:10px}
-      .attachment-actions{display:grid;grid-template-columns:1fr}
-      .attachment-actions button{width:100%}
       .modal-card .modal-body{padding:16px}
     }
     @media (max-width: 480px){
       .split-field{grid-template-columns:1fr}
       .split-field textarea{min-height:88px}
       .split-field .attachment-box{min-height:auto}
-      .image-preview-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -752,8 +817,7 @@
             <div class="flex" style="justify-content:flex-end; margin-bottom:6px">
               <div class="flex">
                 <button id="btnPrintWeeklyReportViewer" class="secondary">In báo cáo</button>
-                <button id="btnRefreshViewer" class="secondary">Làm mới</button>
-                <button id="btnBackHome" class="secondary">Quay lại</button>
+                                <button id="btnBackHome" class="secondary">Quay lại</button>
               </div>
             </div>
 
@@ -840,8 +904,7 @@
               
               <div class="flex">
                 <button id="btnPrintWeeklyReportAdmin" class="secondary">In báo cáo</button>
-                <button id="btnRefreshAdmin">Làm mới</button>
-                <button id="btnExportCsv" class="secondary">Xuất Excel</button>
+                                <button id="btnExportCsv" class="secondary">Xuất Excel</button>
                 <button id="btnLogoutAdmin" class="secondary">Đăng xuất</button>
               </div>
             </div>
@@ -904,8 +967,8 @@
                       <input id="taskDescriptionImage" type="file" accept="image/*,application/pdf,.pdf" multiple />
                       <div class="attachment-actions">
                         <button id="btnRemoveTaskImage" type="button" class="secondary">Xóa tệp</button>
+                        <div id="taskImagePreview" class="attachment-file-list"></div>
                       </div>
-                      <div id="taskImagePreview" class="image-preview-grid"></div>
                     </div>
                   </div>
                 </div>
@@ -920,8 +983,8 @@
                       <input id="taskNoteFile" type="file" accept="image/*,application/pdf,.pdf" multiple />
                       <div class="attachment-actions">
                         <button id="btnRemoveTaskNoteFile" type="button" class="secondary">Xóa tệp</button>
+                        <div id="taskNotePreview" class="attachment-file-list"></div>
                       </div>
-                      <div id="taskNotePreview" class="image-preview-grid"></div>
                     </div>
                   </div>
                 </div>
@@ -956,6 +1019,28 @@
               <div class="flex" style="justify-content:space-between; margin-bottom:6px">
                 <h3 style="margin:0;font-size:22px">Danh sách quản trị</h3>
                               </div>
+              <div class="admin-filter-grid">
+                <div>
+                  <label for="adminFilterKeyword">Công việc</label>
+                  <input id="adminFilterKeyword" type="text" placeholder="Tìm theo tên công việc hoặc nội dung..." />
+                </div>
+                <div>
+                  <label for="adminFilterAssignee">Người phụ trách</label>
+                  <select id="adminFilterAssignee">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="adminFilterWeek">Tuần giao</label>
+                  <select id="adminFilterWeek">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div>
+                  <label>&nbsp;</label>
+                  <button id="btnClearAdminFilters" class="secondary">Xóa lọc</button>
+                </div>
+              </div>
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -1083,8 +1168,8 @@
                 <input id="editTaskDescriptionImage" type="file" accept="image/*,application/pdf,.pdf" multiple />
                 <div class="attachment-actions">
                   <button id="btnRemoveEditTaskImage" type="button" class="secondary">Xóa tệp</button>
+                  <div id="editTaskImagePreview" class="attachment-file-list"></div>
                 </div>
-                <div id="editTaskImagePreview" class="image-preview-grid"></div>
               </div>
             </div>
           </div>
@@ -1099,8 +1184,8 @@
                 <input id="editTaskNoteFile" type="file" accept="image/*,application/pdf,.pdf" multiple />
                 <div class="attachment-actions">
                   <button id="btnRemoveEditTaskNoteFile" type="button" class="secondary">Xóa tệp</button>
+                  <div id="editTaskNotePreview" class="attachment-file-list"></div>
                 </div>
-                <div id="editTaskNotePreview" class="image-preview-grid"></div>
               </div>
             </div>
           </div>
@@ -1109,6 +1194,43 @@
         <div class="flex" style="justify-content:flex-end; margin-top:8px">
           <button id="btnCancelEditTask" class="secondary">Hủy</button>
           <button id="btnSaveEditTask" class="success">Lưu chỉnh sửa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="viewerAlertModal" class="modal-backdrop hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-head">
+        <h3 style="margin:0;font-size:24px">Thông báo công việc cần lưu ý</h3>
+        <div class="muted small" id="viewerAlertSub" style="margin-top:6px">Tổng hợp các công việc quá hạn và sắp hết hạn trong 3 ngày.</div>
+      </div>
+      <div class="modal-body">
+        <div class="alert-columns">
+          <div class="alert-column">
+            <div class="alert-summary-card overdue">
+              <h4>Công việc quá hạn</h4>
+              <div class="alert-summary-count" id="viewerAlertOverdueCount">0</div>
+              <div class="alert-caption">Các công việc đã quá hạn nhưng chưa hoàn thành.</div>
+            </div>
+            <h4 class="alert-column-title" style="color:#a12626">Danh sách công việc quá hạn</h4>
+            <div class="alert-list" id="viewerAlertOverdueList"></div>
+          </div>
+
+          <div class="alert-column">
+            <div class="alert-summary-card due-soon">
+              <h4>Hết hạn trong 3 ngày</h4>
+              <div class="alert-summary-count" id="viewerAlertDueSoonCount">0</div>
+              <div class="alert-caption">Các công việc còn hạn từ hôm nay đến 3 ngày tới.</div>
+            </div>
+            <h4 class="alert-column-title" style="color:#c62828">Danh sách công việc sắp hết hạn</h4>
+            <div class="alert-list" id="viewerAlertDueSoonList"></div>
+          </div>
+        </div>
+
+        <div class="flex" style="justify-content:flex-end; margin-top:14px">
+          <button id="btnCloseViewerAlert" class="secondary">Đã xem</button>
         </div>
       </div>
     </div>
@@ -1404,11 +1526,8 @@
       return;
     }
     box.innerHTML = items.map(item => {
-      const previewUrl = String(item.previewUrl || "").trim() || getAttachmentPreviewUrl(item);
-      if (item.attachmentType === "image" && previewUrl) {
-        return `<div class="image-preview-card"><img src="${previewUrl}" alt="${escapeHtml(item.attachmentName || "Ảnh đính kèm")}"><div class="image-preview-name">${escapeHtml(item.attachmentName || "Ảnh đính kèm")}</div></div>`;
-      }
-      return `<div class="image-preview-card"><div class="image-preview-file">PDF</div><div class="image-preview-name">${escapeHtml(item.attachmentName || "tep-dinh-kem.pdf")}</div></div>`;
+      const fileName = item.attachmentName || (item.attachmentType === "pdf" ? "tep-dinh-kem.pdf" : "anh-dinh-kem.jpg");
+      return `<span class="attachment-file-item" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>`;
     }).join("");
   }
 
@@ -1643,6 +1762,7 @@
     if ($("viewerLoginModal")) closeViewerLoginModal();
     if ($("adminLoginModal")) closeAdminLoginModal();
     if ($("editTaskModal")) closeEditTaskModal();
+    if ($("viewerAlertModal")) closeViewerAlertModal();
   }
 
   function makeId() {
@@ -1908,7 +2028,7 @@
       return sortTasks(getFilteredTasks());
     }
     if (!$("adminPanel").classList.contains("hidden")) {
-      return sortTasks(state.tasks);
+      return sortTasks(getFilteredAdminTasks());
     }
     return sortTasks(state.tasks);
   }
@@ -2000,18 +2120,24 @@
     renderAll();
   }
 
-  function populateFilters() {
-    const assigneeSelect = $("filterAssignee");
-    const currentAssignee = assigneeSelect.value;
-    const assignees = [...new Set(state.tasks.map(task => task.assignee).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi"));
-    assigneeSelect.innerHTML = '<option value="">Tất cả</option>' + assignees.map(name => '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>').join("");
-    if (["", ...assignees].includes(currentAssignee)) assigneeSelect.value = currentAssignee;
+  function populateSelectOptions(selectId, values, formatter = value => value) {
+    const select = $(selectId);
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Tất cả</option>' + values.map(value => '<option value="' + escapeHtml(value) + '">' + escapeHtml(formatter(value)) + '</option>').join("");
+    if (["", ...values].includes(currentValue)) {
+      select.value = currentValue;
+    }
+  }
 
-    const weekSelect = $("filterWeek");
-    const currentWeek = weekSelect.value;
+  function populateFilters() {
+    const assignees = [...new Set(state.tasks.map(task => task.assignee).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi"));
     const weeks = [...new Set(state.tasks.map(task => task.assignedWeek).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    weekSelect.innerHTML = '<option value="">Tất cả</option>' + weeks.map(week => '<option value="' + escapeHtml(week) + '">' + escapeHtml(formatWeek(week)) + '</option>').join("");
-    if (["", ...weeks].includes(currentWeek)) weekSelect.value = currentWeek;
+
+    populateSelectOptions("filterAssignee", assignees);
+    populateSelectOptions("filterWeek", weeks, formatWeek);
+    populateSelectOptions("adminFilterAssignee", assignees);
+    populateSelectOptions("adminFilterWeek", weeks, formatWeek);
   }
 
   function getFilteredTasks() {
@@ -2029,6 +2155,20 @@
       if (week && task.assignedWeek !== week) return false;
       if (status && task.status !== status) return false;
       if (soonDue === "yes" && !dueSoon) return false;
+      return true;
+    });
+  }
+
+  function getFilteredAdminTasks() {
+    const keyword = ($("adminFilterKeyword")?.value || "").trim().toLowerCase();
+    const assignee = ($("adminFilterAssignee")?.value || "").trim();
+    const week = ($("adminFilterWeek")?.value || "").trim();
+
+    return state.tasks.filter(task => {
+      const haystack = [task.title, getTaskDescriptionText(task.description), task.assignee, formatWeek(task.assignedWeek)].join(" ").toLowerCase();
+      if (keyword && !haystack.includes(keyword)) return false;
+      if (assignee && task.assignee !== assignee) return false;
+      if (week && task.assignedWeek !== week) return false;
       return true;
     });
   }
@@ -2092,6 +2232,7 @@
   }
 
   function renderAdminTasks() {
+    const tasks = getFilteredAdminTasks();
     const body = $("adminTaskBody");
     body.innerHTML = "";
 
@@ -2100,7 +2241,12 @@
       return;
     }
 
-    state.tasks.forEach((task, idx) => {
+    if (!tasks.length) {
+      body.innerHTML = '<tr><td colspan="8"><div class="empty-state">Không có công việc phù hợp với điều kiện lọc hiện tại.</div></td></tr>';
+      return;
+    }
+
+    tasks.forEach((task, idx) => {
       const noteHtml = buildNoteCellHtml(task);
       const dueSoonClass = isDueSoon(task) ? 'due-soon-date' : '';
       const tr = document.createElement("tr");
@@ -2772,6 +2918,84 @@ th{font-weight:700;background:#f1f1f1}
     renderViewerTasks();
   }
 
+  function clearAdminFilters() {
+    $("adminFilterKeyword").value = "";
+    $("adminFilterAssignee").value = "";
+    $("adminFilterWeek").value = "";
+    renderAdminTasks();
+  }
+
+
+  function getViewerAlertTasks() {
+    return {
+      overdue: state.tasks.filter(task => isOverdue(task)),
+      dueSoon: state.tasks.filter(task => isDueSoon(task))
+    };
+  }
+
+  function buildViewerAlertTable(tasks, type) {
+    if (!tasks.length) {
+      return '<div class="alert-empty">' + (type === "overdue"
+        ? 'Hiện không có công việc quá hạn.'
+        : 'Hiện không có công việc nào hết hạn trong 3 ngày tới.') + '</div>';
+    }
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Công việc</th>
+            <th>Người phụ trách</th>
+            <th>Tuần giao</th>
+            <th>Hạn hoàn thành</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasks.map((task, idx) => `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>
+                <div class="task-title">${escapeHtml(task.title)}</div>
+                ${buildTaskDescriptionHtml(task.description)}
+              </td>
+              <td>${escapeHtml(task.assignee || "-")}</td>
+              <td>${formatWeekStackedHtml(task.assignedWeek)}</td>
+              <td><span class="${type === "dueSoon" ? "due-soon-date" : ""}">${escapeHtml(formatDate(task.dueDate))}</span></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openViewerAlertModal() {
+    $("viewerAlertModal").classList.remove("hidden");
+  }
+
+  function closeViewerAlertModal() {
+    $("viewerAlertModal").classList.add("hidden");
+  }
+
+  function showViewerAlertModal() {
+    const groups = getViewerAlertTasks();
+    const overdueTasks = sortTasks(groups.overdue);
+    const dueSoonTasks = sortTasks(groups.dueSoon);
+
+    $("viewerAlertOverdueCount").textContent = String(overdueTasks.length);
+    $("viewerAlertDueSoonCount").textContent = String(dueSoonTasks.length);
+    $("viewerAlertOverdueList").innerHTML = buildViewerAlertTable(overdueTasks, "overdue");
+    $("viewerAlertDueSoonList").innerHTML = buildViewerAlertTable(dueSoonTasks, "dueSoon");
+
+    const totalAttention = overdueTasks.length + dueSoonTasks.length;
+    $("viewerAlertSub").textContent = totalAttention
+      ? `Hiện có ${overdueTasks.length} công việc quá hạn và ${dueSoonTasks.length} công việc hết hạn trong 3 ngày cần theo dõi.`
+      : "Hiện chưa có công việc quá hạn hoặc hết hạn trong 3 ngày tới.";
+
+    openViewerAlertModal();
+  }
+
+
   function openViewerLoginModal() {
     $("viewerLoginModal").classList.remove("hidden");
     $("viewerPasswordInput").value = "";
@@ -2793,6 +3017,7 @@ th{font-weight:700;background:#f1f1f1}
     enterWorkMode();
     setMain("Danh sách công việc của đội", "Mọi thành viên có thể theo dõi toàn bộ đầu việc, người phụ trách và thời hạn xử lý.");
     showOnly("viewerPanel");
+    showViewerAlertModal();
   }
 
   $("btnViewerMode").addEventListener("click", handleViewerLogin);
@@ -2878,8 +3103,6 @@ th{font-weight:700;background:#f1f1f1}
 
   $("btnPrintWeeklyReportViewer").addEventListener("click", printWeeklyReport);
   $("btnPrintWeeklyReportAdmin").addEventListener("click", printWeeklyReport);
-  $("btnRefreshViewer").addEventListener("click", () => loadTasks(true));
-  $("btnRefreshAdmin").addEventListener("click", () => loadTasks(true));
   $("btnExportCsv").addEventListener("click", exportCsv);
   $("btnSaveTask").addEventListener("click", handleSaveTask);
   $("btnResetForm").addEventListener("click", resetForm);
@@ -2897,10 +3120,22 @@ th{font-weight:700;background:#f1f1f1}
   $("editTaskAssignedWeek").addEventListener("input", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
   $("editTaskAssignedWeek").addEventListener("change", () => updateWeekDisplay("editTaskAssignedWeek", "editTaskAssignedWeekDisplay", "editTaskAssignedWeekInlineDisplay"));
   $("btnClearFilters").addEventListener("click", clearFilters);
+  $("btnClearAdminFilters").addEventListener("click", clearAdminFilters);
 
   ["filterKeyword", "filterAssignee", "filterWeek", "filterStatus", "filterSoonDue"].forEach(id => {
     $(id).addEventListener("input", renderViewerTasks);
     $(id).addEventListener("change", renderViewerTasks);
+  });
+
+  ["adminFilterKeyword", "adminFilterAssignee", "adminFilterWeek"].forEach(id => {
+    $(id).addEventListener("input", renderAdminTasks);
+    $(id).addEventListener("change", renderAdminTasks);
+  });
+
+
+  $("btnCloseViewerAlert").addEventListener("click", closeViewerAlertModal);
+  $("viewerAlertModal").addEventListener("click", (event) => {
+    if (event.target === $("viewerAlertModal")) closeViewerAlertModal();
   });
 
   $("btnSubmitViewerLogin").addEventListener("click", handleViewerLogin);
