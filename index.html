@@ -50,15 +50,15 @@
     }
     .top-unit{
       text-align:center;
-      color:var(--gold);
+      color:#fff;
       padding:18px 12px 4px;
       line-height:1.35;
       text-shadow:0 2px 6px rgba(0,0,0,.45);
       font-weight:700;
       text-transform:uppercase;
     }
-    .top-unit .line1{font-size:20px;}
-    .top-unit .line2{font-size:19px;}
+    .top-unit .line1,
+    .top-unit .line2{font-size:26px;}
     .topbar{
       width:calc(100vw - 32px);
       max-width:none;
@@ -747,8 +747,8 @@
       .summary-grid{grid-template-columns:1fr}
       .topbar{flex-direction:column;align-items:flex-start}
       .topbar h1{font-size:22px}
-      .top-unit .line1{font-size:17px}
-      .top-unit .line2{font-size:16px}
+      .top-unit .line1,
+      .top-unit .line2{font-size:22px}
       .filter-grid,.admin-filter-grid,.form-grid,.compact-form-panel .form-grid,.alert-columns{grid-template-columns:1fr}
       .split-field{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .split-field textarea{min-height:96px}
@@ -2080,6 +2080,16 @@
     setStatus("info", "Đang tải danh sách công việc...");
 
     const localTasks = sortTasks(readLocalTasks());
+    const hasLocalCache = localTasks.length > 0;
+
+    if (hasLocalCache) {
+      state.tasks = localTasks;
+      state.syncMode = state.syncMode === "cloud" ? "cloud" : "local";
+      state.lastLoadSource = "local-cache";
+      updateSyncUI();
+      renderAll();
+      setStatus("info", "Đang mở nhanh dữ liệu đã lưu trên máy và đồng bộ nền...");
+    }
 
     if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
       state.tasks = localTasks;
@@ -2094,7 +2104,7 @@
 
     try {
       const url = SCRIPT_URL + (SCRIPT_URL.includes("?") ? "&" : "?") + "action=listTasks&_ts=" + Date.now();
-      const resp = await fetch(url);
+      const resp = await fetch(url, { cache: "no-store" });
       const data = await resp.json();
       const rows = Array.isArray(data.rows) ? data.rows : [];
       state.tasks = sortTasks(rows.map(normalizeTask).filter(task => task.title));
@@ -2173,11 +2183,12 @@
     });
   }
 
-  function renderSummary(targetPrefix = "") {
-    const total = state.tasks.length;
-    const doing = state.tasks.filter(task => task.status === "Đang thực hiện").length;
-    const done = state.tasks.filter(task => task.status === "Hoàn thành").length;
-    const overdue = state.tasks.filter(task => isOverdue(task)).length;
+  function renderSummary(targetPrefix = "", tasks = state.tasks) {
+    const sourceTasks = Array.isArray(tasks) ? tasks : state.tasks;
+    const total = sourceTasks.length;
+    const doing = sourceTasks.filter(task => task.status === "Đang thực hiện").length;
+    const done = sourceTasks.filter(task => task.status === "Hoàn thành").length;
+    const overdue = sourceTasks.filter(task => isOverdue(task)).length;
 
     const idMap = targetPrefix === "admin"
       ? {
@@ -2197,6 +2208,16 @@
     $(idMap.doing).textContent = String(doing);
     $(idMap.overdue).textContent = String(overdue);
     $(idMap.done).textContent = String(done);
+  }
+
+  function renderViewerSection() {
+    renderSummary("", getFilteredTasks());
+    renderViewerTasks();
+  }
+
+  function renderAdminSection() {
+    renderSummary("admin", getFilteredAdminTasks());
+    renderAdminTasks();
   }
 
   function renderViewerTasks() {
@@ -2275,10 +2296,8 @@
 
   function renderAll() {
     populateFilters();
-    renderSummary("");
-    renderSummary("admin");
-    renderViewerTasks();
-    renderAdminTasks();
+    renderViewerSection();
+    renderAdminSection();
   }
 
   function toggleCustomAssigneeInput() {
@@ -2915,14 +2934,14 @@ th{font-weight:700;background:#f1f1f1}
     $("filterWeek").value = "";
     $("filterStatus").value = "";
     $("filterSoonDue").value = "";
-    renderViewerTasks();
+    renderViewerSection();
   }
 
   function clearAdminFilters() {
     $("adminFilterKeyword").value = "";
     $("adminFilterAssignee").value = "";
     $("adminFilterWeek").value = "";
-    renderAdminTasks();
+    renderAdminSection();
   }
 
 
@@ -3014,10 +3033,25 @@ th{font-weight:700;background:#f1f1f1}
   function handleViewerLogin() {
     $("viewerPassword").value = "";
     closeViewerLoginModal();
+
+    if (!state.tasks.length) {
+      const cachedTasks = sortTasks(readLocalTasks());
+      if (cachedTasks.length) {
+        state.tasks = cachedTasks;
+        state.lastLoadSource = "local-cache";
+      }
+    }
+
     enterWorkMode();
     setMain("Danh sách công việc của đội", "Mọi thành viên có thể theo dõi toàn bộ đầu việc, người phụ trách và thời hạn xử lý.");
     showOnly("viewerPanel");
-    showViewerAlertModal();
+    renderViewerSection();
+
+    setTimeout(() => {
+      if (!$("viewerPanel").classList.contains("hidden")) {
+        showViewerAlertModal();
+      }
+    }, 80);
   }
 
   $("btnViewerMode").addEventListener("click", handleViewerLogin);
@@ -3123,13 +3157,13 @@ th{font-weight:700;background:#f1f1f1}
   $("btnClearAdminFilters").addEventListener("click", clearAdminFilters);
 
   ["filterKeyword", "filterAssignee", "filterWeek", "filterStatus", "filterSoonDue"].forEach(id => {
-    $(id).addEventListener("input", renderViewerTasks);
-    $(id).addEventListener("change", renderViewerTasks);
+    $(id).addEventListener("input", renderViewerSection);
+    $(id).addEventListener("change", renderViewerSection);
   });
 
   ["adminFilterKeyword", "adminFilterAssignee", "adminFilterWeek"].forEach(id => {
-    $(id).addEventListener("input", renderAdminTasks);
-    $(id).addEventListener("change", renderAdminTasks);
+    $(id).addEventListener("input", renderAdminSection);
+    $(id).addEventListener("change", renderAdminSection);
   });
 
 
